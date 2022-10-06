@@ -1,14 +1,13 @@
 from sqlalchemy import Column, Integer, String
 
-import sql_global
-
 import scrape
+import sql_global
 
 
 class Avatar(sql_global.Base):
     __tablename__ = "avatar"
-    id = Column("avatar_id", Integer, primary_key=True)
-    name = Column("avatar_name", String(32))
+    id = Column("id", Integer, primary_key=True)
+    name = Column("name", String(32))
 
     def __repr__(self):
         return f"<Avatar(id={self.id}, name={self.name})>"
