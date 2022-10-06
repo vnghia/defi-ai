@@ -1,3 +1,5 @@
+import enum
+
 cities = [
     "amsterdam",
     "copenhagen",
@@ -9,6 +11,8 @@ cities = [
     "vienna",
     "vilnius",
 ]
+
+City = enum.Enum("City", cities)
 
 languages = [
     "austrian",
@@ -38,3 +42,5 @@ languages = [
     "spanish",
     "swedish",
 ]
+
+Language = enum.Enum("Language", languages)
