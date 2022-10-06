@@ -1,5 +1,9 @@
-# Created by https://www.toptal.com/developers/gitignore/api/python,windows,linux,macos,jupyternotebooks
-# Edit at https://www.toptal.com/developers/gitignore?templates=python,windows,linux,macos,jupyternotebooks
+# Created by https://www.toptal.com/developers/gitignore/api/direnv,python,jupyternotebooks,macos,windows,linux
+# Edit at https://www.toptal.com/developers/gitignore?templates=direnv,python,jupyternotebooks,macos,windows,linux
+
+### direnv ###
+.direnv
+.envrc
 
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
@@ -247,4 +251,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/python,windows,linux,macos,jupyternotebooks
+# End of https://www.toptal.com/developers/gitignore/api/direnv,python,jupyternotebooks,macos,windows,linux
