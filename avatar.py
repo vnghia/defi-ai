@@ -20,12 +20,9 @@ class Avatar(Base):
             if name is None:
                 name = str(
                     int(
-                        session.query(Avatar)
-                        .filter(
-                            Avatar.id == session.query(func.max(Avatar.id)).scalar()
-                        )
-                        .one()
-                        .name
+                        session.get(
+                            Avatar, session.query(func.max(Avatar.id)).scalar()
+                        ).name
                     )
                     + 1
                 )
