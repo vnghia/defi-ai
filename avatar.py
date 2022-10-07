@@ -14,6 +14,9 @@ class Avatar(Base):
     def __repr__(self):
         return f"<Avatar(id={self.id}, name={self.name})>"
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.c}
+
     @classmethod
     def new(cls, name: str = None):
         with Session() as session:

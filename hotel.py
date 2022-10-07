@@ -24,6 +24,9 @@ class Hotel(Base):
     def __repr__(self):
         return f"<Hotel(id={self.id}, group={self.group}, brand={self.brand}, city={self.city}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy.name})>"
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.c}
+
     @classmethod
     def list(cls):
         with Session() as session:

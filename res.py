@@ -17,6 +17,9 @@ class Response(Base):
     def __repr__(self):
         return f"<Response(id={self.id}, request_id={self.request_id}, hotel_id={self.hotel_id}, price={self.price}, stock={self.stock})>"
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.c}
+
     @classmethod
     def from_list(
         cls, request_id: int, prices: list[dict[str, int]], session: sessionmaker

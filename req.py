@@ -22,6 +22,9 @@ class Request(Base):
     def __repr__(self):
         return f"<Request(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile})>"
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.c}
+
     @classmethod
     def send(
         cls,
