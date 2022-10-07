@@ -1,9 +1,9 @@
 from sqlalchemy import Column, ForeignKey, Integer
 
-import sql_global
+from sql_global import Base, Session
 
 
-class Response(sql_global.Base):
+class Response(Base):
     __tablename__ = "response"
     id = Column("id", Integer, primary_key=True)
     request_id = Column("request_id", Integer, ForeignKey("request.id"))
@@ -26,7 +26,7 @@ class Response(sql_global.Base):
                     stock=price["stock"],
                 )
             )
-        with sql_global.Session() as session:
+        with Session() as session:
             session.add_all(results)
             session.commit()
         return results

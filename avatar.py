@@ -2,10 +2,10 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
 import scrape
-import sql_global
+from sql_global import Base, Session
 
 
-class Avatar(sql_global.Base):
+class Avatar(Base):
     __tablename__ = "avatar"
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(32))
@@ -18,14 +18,14 @@ class Avatar(sql_global.Base):
     def new(cls, name: str):
         id, name = scrape.create_user(name)
         avatar = cls(id=id, name=name)
-        with sql_global.Session() as session:
+        with Session() as session:
             session.add(avatar)
             session.commit()
         return avatar
 
     @classmethod
     def list(cls):
-        with sql_global.Session() as session:
+        with Session() as session:
             return session.query(cls).all()
 
     @staticmethod
@@ -34,7 +34,7 @@ class Avatar(sql_global.Base):
 
     @classmethod
     def update(cls):
-        with sql_global.Session() as session:
+        with Session() as session:
             for user in cls.list_online():
                 if not session.get(cls, user[0]):
                     session.add(cls(id=user[0], name=user[1]))

@@ -5,8 +5,8 @@ from posixpath import join as urljoin
 import requests
 from sqlalchemy import Column, Date, Integer
 
-import sql_global
 from req_enums import City, Language
+from sql_global import Base, Session
 
 HOST_URL = os.environ["HOST_URL"]
 USER_ID = os.environ["USER_ID"]
@@ -14,14 +14,14 @@ USER_ID = os.environ["USER_ID"]
 today = date.today()
 
 
-class RequestCount(sql_global.Base):
+class RequestCount(Base):
     __tablename__ = "request_count"
     date = Column("date", Date, primary_key=True)
     count = Column("count", Integer)
 
 
 def update_request_count():
-    with sql_global.Session() as session:
+    with Session() as session:
         rc = session.get(RequestCount, today)
         if rc is None:
             session.add(RequestCount(date=today, count=1))
