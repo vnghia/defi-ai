@@ -7,8 +7,10 @@ from sql_global import Base, Session
 class Response(Base):
     __tablename__ = "response"
     id = Column("id", Integer, primary_key=True)
-    request_id = Column("request_id", Integer, ForeignKey("request.id"))
-    hotel_id = Column("hotel_id", Integer, ForeignKey("hotel.id"))
+    request_id = Column(
+        "request_id", Integer, ForeignKey("request.id", ondelete="CASCADE")
+    )
+    hotel_id = Column("hotel_id", Integer, ForeignKey("hotel.id", ondelete="CASCADE"))
     price = Column("price", Integer)
     stock = Column("stock", Integer)
     request = relationship("Request", back_populates="responses")

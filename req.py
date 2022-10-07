@@ -11,12 +11,19 @@ from sql_global import Base, Enum, Session
 class Request(Base):
     __tablename__ = "request"
     id = Column("id", Integer, primary_key=True)
-    avatar_id = Column("avatar_id", Integer, ForeignKey("avatar.id"))
+    avatar_id = Column(
+        "avatar_id", Integer, ForeignKey("avatar.id", ondelete="CASCADE")
+    )
     language = Column("language", Enum(Language))
     city = Column("city", Enum(City))
     date = Column("date", Integer)
     mobile = Column("mobile", Boolean)
-    responses = relationship("Response", back_populates="request")
+    responses = relationship(
+        "Response",
+        back_populates="request",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
     avatar = relationship("Avatar", back_populates="requests")
 
     def __repr__(self):
