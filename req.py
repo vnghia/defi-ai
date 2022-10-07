@@ -16,7 +16,8 @@ class Request(Base):
     city = Column("city", Enum(City))
     date = Column("date", Integer)
     mobile = Column("mobile", Boolean)
-    responses = relationship("Response")
+    responses = relationship("Response", back_populates="request")
+    avatar = relationship("Avatar", back_populates="requests")
 
     def __repr__(self):
         return f"<Request(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile})>"

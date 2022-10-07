@@ -1,4 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import relationship
 
 from sql_global import Base, Session
 
@@ -10,6 +11,8 @@ class Response(Base):
     hotel_id = Column("hotel_id", Integer, ForeignKey("hotel.id"))
     price = Column("price", Integer)
     stock = Column("stock", Integer)
+    request = relationship("Request", back_populates="responses")
+    hotel = relationship("Hotel", back_populates="responses")
 
     def __repr__(self):
         return f"<Response(id={self.id}, request_id={self.request_id}, hotel_id={self.hotel_id}, price={self.price}, stock={self.stock})>"

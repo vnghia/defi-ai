@@ -9,7 +9,7 @@ class Avatar(Base):
     __tablename__ = "avatar"
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(32))
-    requests = relationship("Request")
+    requests = relationship("Request", back_populates="avatar")
 
     def __repr__(self):
         return f"<Avatar(id={self.id}, name={self.name})>"

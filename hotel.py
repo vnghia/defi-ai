@@ -19,7 +19,7 @@ class Hotel(Base):
     parking = Column("parking", Boolean)
     pool = Column("pool", Boolean)
     children_policy = Column("children_policy", Enum(ChildrenPolicy))
-    responses = relationship("Response")
+    responses = relationship("Response", back_populates="hotel")
 
     def __repr__(self):
         return f"<Hotel(id={self.id}, group={self.group}, brand={self.brand}, city={self.city}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy.name})>"
