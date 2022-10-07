@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import relationship
 
 import scrape
 import sql_global
@@ -8,6 +9,7 @@ class Avatar(sql_global.Base):
     __tablename__ = "avatar"
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(32))
+    requests = relationship("Request")
 
     def __repr__(self):
         return f"<Avatar(id={self.id}, name={self.name})>"

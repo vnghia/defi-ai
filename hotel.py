@@ -2,6 +2,7 @@ import enum
 
 import pandas as pd
 from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy.orm import relationship
 
 import sql_global
 from req_enums import City
@@ -18,6 +19,7 @@ class Hotel(sql_global.Base):
     parking = Column("parking", Boolean)
     pool = Column("pool", Boolean)
     children_policy = Column("children_policy", sql_global.Enum(ChildrenPolicy))
+    responses = relationship("Response")
 
     @classmethod
     def update(cls):

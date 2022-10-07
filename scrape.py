@@ -5,6 +5,8 @@ from posixpath import join as urljoin
 import pandas as pd
 import requests
 
+from req_enums import City, Language
+
 HOST_URL = os.environ["HOST_URL"]
 USER_ID = os.environ["USER_ID"]
 REQUEST_COUNT = os.environ["REQUEST_COUNT"]
@@ -39,3 +41,23 @@ def list_users() -> list[tuple[int, str]]:
     r.raise_for_status()
     body = r.json()
     return [(user["id"], user["name"]) for user in body]
+
+
+def get_pricing(
+    name: str,
+    language: Language,
+    city: City,
+    date: int,
+    mobile: bool,
+) -> list[dict[str, int]]:
+    update_request_count()
+    params = {
+        "avatar_name": name,
+        "language": language.name,
+        "city": city.name,
+        "date": date,
+        "mobile": int(mobile),
+    }
+    r = requests.get(get_url("pricing", USER_ID), params=params)
+    r.raise_for_status()
+    return r.json()["prices"]
