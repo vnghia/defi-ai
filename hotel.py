@@ -1,5 +1,3 @@
-import enum
-
 import pandas as pd
 from sqlalchemy import Boolean, CheckConstraint, Column, Integer, String
 from sqlalchemy.orm import relationship
