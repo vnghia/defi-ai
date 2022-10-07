@@ -35,8 +35,10 @@ class Request(sql_global.Base):
         req = cls(
             avatar_id=avatar_id, language=language, city=city, date=date, mobile=mobile
         )
+        req_id = None
         with sql_global.Session() as session:
             session.add(req)
             session.commit()
-        res = Response.from_list(req.id, prices)
+            req_id = req.id
+        res = Response.from_list(req_id, prices)
         return req, res
