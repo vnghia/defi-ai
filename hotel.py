@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship
 
 from req_enums import City
-from sql_global import Base, Engine, Enum
+from sql_global import Base, Engine, Enum, Session
 
 ChildrenPolicy = enum.Enum("ChildrenPolicy", "0 1 2")
 
@@ -20,6 +20,14 @@ class Hotel(Base):
     pool = Column("pool", Boolean)
     children_policy = Column("children_policy", Enum(ChildrenPolicy))
     responses = relationship("Response")
+
+    def __repr__(self):
+        return f"<Hotel(id={self.id}, group={self.group}, brand={self.brand}, city={self.city}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy.name})>"
+
+    @classmethod
+    def list(cls):
+        with Session() as session:
+            return session.query(cls).all()
 
     @classmethod
     def update(cls):

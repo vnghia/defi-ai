@@ -19,6 +19,14 @@ class RequestCount(Base):
     date = Column("date", Date, primary_key=True)
     count = Column("count", Integer)
 
+    def __repr__(self):
+        return f"<RequestCount(date={self.date}, count={self.count})>"
+
+    @classmethod
+    def list(cls):
+        with Session() as session:
+            return session.query(cls).all()
+
 
 def update_request_count():
     with Session() as session:

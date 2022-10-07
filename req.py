@@ -42,3 +42,8 @@ class Request(Base):
             req_id = req.id
         res = Response.from_list(req_id, prices)
         return req, res
+
+    @classmethod
+    def list(cls):
+        with Session() as session:
+            return session.query(cls).all()

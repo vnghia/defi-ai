@@ -30,3 +30,8 @@ class Response(Base):
             session.add_all(results)
             session.commit()
         return results
+
+    @classmethod
+    def list(cls):
+        with Session() as session:
+            return session.query(cls).all()
