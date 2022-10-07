@@ -17,7 +17,7 @@ City = enum.Enum("City", cities)
 languages = [
     "austrian",
     "bulgarian",
-    "chypriot",
+    "cypriot",
     "croatian",
     "czech",
     "danish",
