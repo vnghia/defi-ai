@@ -48,7 +48,7 @@ class Request(Base):
             session.commit()
             for r in res:
                 session.refresh(r)
-            return req, res
+            return res
 
     @classmethod
     def list(cls):
