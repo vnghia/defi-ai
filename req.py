@@ -42,8 +42,12 @@ class Request(Base):
                 mobile=mobile,
             )
             session.add(req)
+            session.commit()
+            session.refresh(req)
             res = Response.from_list(req.id, prices, session)
             session.commit()
+            for r in res:
+                session.refresh(r)
             return req, res
 
     @classmethod

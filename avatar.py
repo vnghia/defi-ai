@@ -33,7 +33,8 @@ class Avatar(Base):
             avatar = cls(id=id, name=name)
             session.add(avatar)
             session.commit()
-        return avatar
+            session.refresh(avatar)
+            return avatar
 
     @classmethod
     def list(cls):
