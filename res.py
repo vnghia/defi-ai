@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
 
 from sql_global import Base, Session
 
@@ -18,7 +18,9 @@ class Response(Base):
         return f"<Response(id={self.id}, request_id={self.request_id}, hotel_id={self.hotel_id}, price={self.price}, stock={self.stock})>"
 
     @classmethod
-    def from_list(cls, request_id: int, prices: list[dict[str, int]]):
+    def from_list(
+        cls, request_id: int, prices: list[dict[str, int]], session: sessionmaker
+    ):
         results = []
         for price in prices:
             results.append(
@@ -29,9 +31,7 @@ class Response(Base):
                     stock=price["stock"],
                 )
             )
-        with Session() as session:
-            session.add_all(results)
-            session.commit()
+        session.add_all(results)
         return results
 
     @classmethod

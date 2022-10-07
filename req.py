@@ -31,18 +31,20 @@ class Request(Base):
         date: int,
         mobile: bool,
     ):
-        avatar_name = Session().get(Avatar, avatar_id).name
-        prices = scrape.get_pricing(avatar_name, language, city, date, mobile)
-        req = cls(
-            avatar_id=avatar_id, language=language, city=city, date=date, mobile=mobile
-        )
-        req_id = None
         with Session() as session:
+            avatar_name = session.get(Avatar, avatar_id).name
+            prices = scrape.get_pricing(avatar_name, language, city, date, mobile)
+            req = cls(
+                avatar_id=avatar_id,
+                language=language,
+                city=city,
+                date=date,
+                mobile=mobile,
+            )
             session.add(req)
+            res = Response.from_list(req.id, prices, session)
             session.commit()
-            req_id = req.id
-        res = Response.from_list(req_id, prices)
-        return req, res
+            return req, res
 
     @classmethod
     def list(cls):

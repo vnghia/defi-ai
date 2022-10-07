@@ -16,20 +16,21 @@ class Avatar(Base):
 
     @classmethod
     def new(cls, name: str = None):
-        if name is None:
-            name = str(
-                int(
-                    Session()
-                    .query(Avatar)
-                    .filter(Avatar.id == Session().query(func.max(Avatar.id)).scalar())
-                    .one()
-                    .name
-                )
-                + 1
-            )
-        id, name = scrape.create_user(name)
-        avatar = cls(id=id, name=name)
         with Session() as session:
+            if name is None:
+                name = str(
+                    int(
+                        session.query(Avatar)
+                        .filter(
+                            Avatar.id == session.query(func.max(Avatar.id)).scalar()
+                        )
+                        .one()
+                        .name
+                    )
+                    + 1
+                )
+            id, name = scrape.create_user(name)
+            avatar = cls(id=id, name=name)
             session.add(avatar)
             session.commit()
         return avatar
