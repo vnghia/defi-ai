@@ -2,25 +2,32 @@ import os
 from datetime import date
 from posixpath import join as urljoin
 
-import pandas as pd
 import requests
+from sqlalchemy import Column, Date, Integer
 
+import sql_global
 from req_enums import City, Language
 
 HOST_URL = os.environ["HOST_URL"]
 USER_ID = os.environ["USER_ID"]
-REQUEST_COUNT = os.environ["REQUEST_COUNT"]
 
-request_count = pd.read_csv(REQUEST_COUNT, index_col="date", parse_dates=True)
-today = pd.Timestamp(date.today())
+today = date.today()
+
+
+class RequestCount(sql_global.Base):
+    __tablename__ = "request_count"
+    date = Column("date", Date, primary_key=True)
+    count = Column("count", Integer)
 
 
 def update_request_count():
-    if today in request_count.index:
-        request_count.loc[today, "count"] += 1
-    else:
-        request_count.loc[today, "count"] = 1
-    request_count.to_csv(REQUEST_COUNT)
+    with sql_global.Session() as session:
+        rc = session.get(RequestCount, today)
+        if rc is None:
+            session.add(RequestCount(date=today, count=1))
+        else:
+            rc.count += 1
+        session.commit()
 
 
 def get_url(*paths) -> str:
