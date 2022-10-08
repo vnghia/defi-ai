@@ -40,6 +40,7 @@ class Request(Base):
         city: City,
         date: int,
         mobile: bool,
+        return_res: bool = False,
     ):
         with Session() as session:
             avatar_name = session.get(Avatar, avatar_id).name
@@ -56,9 +57,13 @@ class Request(Base):
             session.refresh(req)
             res = Response.from_list(req.id, prices, session)
             session.commit()
-            for r in res:
-                session.refresh(r)
-            return res
+            if return_res:
+                for r in res:
+                    session.refresh(r)
+                return req, res
+            else:
+                session.refresh(req)
+                return req
 
     @classmethod
     def list(cls):
