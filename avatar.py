@@ -54,3 +54,8 @@ class Avatar(Base):
                 if not session.get(cls, user[0]):
                     session.add(cls(id=user[0], name=user[1]))
             session.commit()
+
+    @classmethod
+    def from_name(cls, name: str):
+        with Session() as session:
+            return session.query(cls).filter(cls.name == name).one()
