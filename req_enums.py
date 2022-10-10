@@ -1,5 +1,7 @@
 import enum
 
+import pandas as pd
+
 cities = [
     "amsterdam",
     "copenhagen",
@@ -45,3 +47,8 @@ languages = [
 ]
 
 Language = enum.Enum("Language", languages)
+
+df_hotel = pd.read_csv("dataset/features_hotels.csv")
+
+HotelGroup = enum.Enum("HotelGroup", sorted(df_hotel["group"].unique()))
+HotelBrand = enum.Enum("HotelBrand", sorted(df_hotel["brand"].unique()))

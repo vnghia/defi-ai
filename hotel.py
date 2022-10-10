@@ -1,8 +1,8 @@
 import pandas as pd
-from sqlalchemy import Boolean, CheckConstraint, Column, Integer, String
+from sqlalchemy import Boolean, CheckConstraint, Column, Integer
 from sqlalchemy.orm import relationship
 
-from req_enums import City
+from req_enums import City, HotelBrand, HotelGroup
 from sql_global import Base, Engine, Enum, Session
 
 
@@ -10,8 +10,8 @@ class Hotel(Base):
     __tablename__ = "hotel"
     __table_args__ = (CheckConstraint("0 <= children_policy AND children_policy <= 2"),)
     id = Column("id", Integer, primary_key=True, autoincrement=False)
-    group = Column("group", String(64))
-    brand = Column("brand", String(64))
+    group = Column("group", Enum(HotelGroup))
+    brand = Column("brand", Enum(HotelBrand))
     city = Column("city", Enum(City))
     parking = Column("parking", Boolean)
     pool = Column("pool", Boolean)
@@ -21,7 +21,7 @@ class Hotel(Base):
     )
 
     def __repr__(self):
-        return f"<Hotel(id={self.id}, group={self.group}, brand={self.brand}, city={self.city}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy.name})>"
+        return f"<Hotel(id={self.id}, group={self.group.name}, brand={self.brand.name}, city={self.city}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy})>"
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
