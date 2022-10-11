@@ -8,6 +8,7 @@ import pandas as pd
 from defi_ai.sql.base import SQLBase
 from defi_ai.type import City, HotelBrand, HotelGroup, SQLSession
 from sqlalchemy import Boolean, CheckConstraint, Column, Enum, Integer
+from sqlalchemy.orm import relationship
 
 
 class Hotel(SQLBase):
@@ -20,6 +21,9 @@ class Hotel(SQLBase):
     parking = Column("parking", Boolean)
     pool = Column("pool", Boolean)
     children_policy = Column("children_policy", Integer)
+    responses = relationship(
+        "Response", back_populates="hotel", cascade="all, delete", passive_deletes=True
+    )
 
     def __repr__(self) -> str:
         return f"<Hotel(id={self.id}, group={self.group.name}, brand={self.brand.name}, city={self.city}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy})>"

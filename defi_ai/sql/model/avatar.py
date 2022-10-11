@@ -10,12 +10,16 @@ from defi_ai import scrape
 from defi_ai.sql.base import SQLBase
 from defi_ai.type import SQLSession
 from sqlalchemy import Column, Integer, String, func, select
+from sqlalchemy.orm import relationship
 
 
 class Avatar(SQLBase):
     __tablename__ = "avatar"
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(32))
+    requests = relationship(
+        "Request", back_populates="avatar", cascade="all, delete", passive_deletes=True
+    )
 
     def __repr__(self) -> str:
         return f"<Avatar(id={self.id}, name={self.name})>"

@@ -10,6 +10,7 @@ from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.response import Response
 from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer
+from sqlalchemy.orm import relationship
 
 
 class Request(SQLBase):
@@ -22,6 +23,13 @@ class Request(SQLBase):
     city = Column("city", Enum(City))
     date = Column("date", Integer)
     mobile = Column("mobile", Boolean)
+    responses = relationship(
+        "Response",
+        back_populates="request",
+        cascade="all, delete",
+        passive_deletes=True,
+    )
+    avatar = relationship("Avatar", back_populates="requests")
 
     def __repr__(self) -> str:
         return f"<Request(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile})>"
