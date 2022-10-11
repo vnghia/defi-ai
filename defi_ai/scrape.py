@@ -31,16 +31,14 @@ def get_url(*paths: str) -> str:
     return urljoin(HOST_URL, *paths)
 
 
-def create_user(name: str, session: SQLSession) -> tuple[int, str]:
-    update_request_count(session)
+def create_user(name: str) -> tuple[int, str]:
     r = requests.post(get_url("avatars", USER_ID, name))
     r.raise_for_status()
     body = r.json()
     return body["id"], body["name"]
 
 
-def list_users(session: SQLSession) -> list[tuple[int, str]]:
-    update_request_count(session)
+def list_users() -> list[tuple[int, str]]:
     r = requests.get(get_url("avatars", USER_ID))
     r.raise_for_status()
     body = r.json()
