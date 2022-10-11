@@ -1,12 +1,17 @@
+# SPDX-FileCopyrightText: 2022-present Vo Van Nghia <vanvnghia@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+from __future__ import annotations
+
 import pandas as pd
-from sqlalchemy import Boolean, CheckConstraint, Column, Integer
+from defi_ai.sql.base import SQLBase
+from sqlalchemy import Boolean, CheckConstraint, Column, Enum, Integer
 from sqlalchemy.orm import relationship
-
-from req_enums import City, HotelBrand, HotelGroup
-from sql_global import Base, Engine, Enum, Session
+from defi_ai.type import City, HotelBrand, HotelGroup, SQLSession
 
 
-class Hotel(Base):
+class Hotel(SQLBase):
     __tablename__ = "hotel"
     __table_args__ = (CheckConstraint("0 <= children_policy AND children_policy <= 2"),)
     id = Column("id", Integer, primary_key=True, autoincrement=False)
@@ -27,13 +32,12 @@ class Hotel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod
-    def list(cls):
-        with Session() as session:
-            return session.query(cls).all()
+    def list(cls, session: SQLSession):
+        return session.query(cls).all()
 
     @classmethod
-    def update(cls):
+    def update(cls, session: SQLSession):
         df = pd.read_csv("dataset/features_hotels.csv").rename(
             columns={"hotel_id": "id"}
         )
-        df.to_sql(cls.__tablename__, Engine, if_exists="append", index=False)
+        df.to_sql(cls.__tablename__, session.bind, if_exists="append", index=False)

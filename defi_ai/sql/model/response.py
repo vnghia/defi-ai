@@ -1,10 +1,16 @@
+# SPDX-FileCopyrightText: 2022-present Vo Van Nghia <vanvnghia@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+from __future__ import annotations
+
+from defi_ai.sql.base import SQLBase
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship
+from defi_ai.type import SQLSession
 
-from sql_global import Base, Session
 
-
-class Response(Base):
+class Response(SQLBase):
     __tablename__ = "response"
     id = Column("id", Integer, primary_key=True)
     request_id = Column(
@@ -24,7 +30,7 @@ class Response(Base):
 
     @classmethod
     def from_list(
-        cls, request_id: int, prices: list[dict[str, int]], session: sessionmaker
+        cls, session: SQLSession, request_id: int, prices: list[dict[str, int]]
     ):
         results = []
         for price in prices:
@@ -40,6 +46,5 @@ class Response(Base):
         return results
 
     @classmethod
-    def list(cls):
-        with Session() as session:
-            return session.query(cls).all()
+    def list(cls, session: SQLSession):
+        return session.query(cls).all()
