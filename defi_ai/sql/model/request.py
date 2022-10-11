@@ -10,7 +10,6 @@ from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.response import Response
 from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer
-from sqlalchemy.orm import relationship
 
 
 class Request(SQLBase):
@@ -23,13 +22,6 @@ class Request(SQLBase):
     city = Column("city", Enum(City))
     date = Column("date", Integer)
     mobile = Column("mobile", Boolean)
-    responses = relationship(
-        "Response",
-        back_populates="request",
-        cascade="all, delete",
-        passive_deletes=True,
-    )
-    avatar = relationship("Avatar", back_populates="requests")
 
     def __repr__(self):
         return f"<Request(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile})>"
@@ -46,7 +38,6 @@ class Request(SQLBase):
         city: City,
         date: int,
         mobile: bool,
-        return_res: bool = False,
     ):
         avatar_name = session.get(Avatar, avatar_id).name
         prices = scrape.get_pricing(avatar_name, language, city, date, mobile)
@@ -60,12 +51,6 @@ class Request(SQLBase):
         session.add(req)
         session.commit()
         session.refresh(req)
-        res = Response.from_list(session, req.id, prices)
+        Response.from_list(session, req.id, prices)
         session.commit()
-        if return_res:
-            for r in res:
-                session.refresh(r)
-            return req, res
-        else:
-            session.refresh(req)
-            return req
+        return req.id
