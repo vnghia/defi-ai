@@ -1,9 +1,10 @@
+import pandas as pd
 from sqlalchemy import Boolean, CheckConstraint, Column, ForeignKey, Integer, func
 
+from hotel import Hotel
+from req import Request
 from req_enums import City, HotelBrand, HotelGroup, Language
 from res import Response
-from req import Request
-from hotel import Hotel
 from sql_global import Base, Enum, Session
 
 
@@ -107,3 +108,49 @@ class DataPoint(Base):
             )
             session.add_all([cls(**response._mapping) for response in next_responses])
             session.commit()
+
+    @classmethod
+    def load_dataset(cls):
+        with Session() as session:
+            rows = (
+                session.query(
+                    cls.language,
+                    cls.city,
+                    cls.date,
+                    cls.mobile,
+                    cls.parking,
+                    cls.pool,
+                    cls.children_policy,
+                    cls.stock,
+                    cls.request_count,
+                    cls.request_language_count,
+                    cls.request_city_count,
+                    cls.request_date_count,
+                    cls.request_mobile_count,
+                    cls.price,
+                )
+                .filter(cls.response_id.is_not(None))
+                .all()
+            )
+            df = pd.DataFrame([row._mapping for row in rows])
+            df = df[
+                [
+                    "language",
+                    "city",
+                    "date",
+                    "mobile",
+                    "parking",
+                    "pool",
+                    "children_policy",
+                    "stock",
+                    "request_count",
+                    "request_language_count",
+                    "request_city_count",
+                    "request_date_count",
+                    "request_mobile_count",
+                    "price",
+                ]
+            ]
+            df_x = df.drop("price", axis=1)
+            df_y = df["price"]
+            return df_x, df_y
