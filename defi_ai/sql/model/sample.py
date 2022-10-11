@@ -16,10 +16,10 @@ class Sample(SQLBase):
     hotel_id = Column("hotel_id", Integer, ForeignKey("hotel.id"))
     stock = Column("stock", Integer)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Sample(id={self.id}, order_requests={self.order_requests}, city={self.city}, date={self.date}, language={self.language}, mobile={self.mobile}, avatar_id={self.avatar_id}, hotel_id={self.hotel_id}, stock={self.stock})>"
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod

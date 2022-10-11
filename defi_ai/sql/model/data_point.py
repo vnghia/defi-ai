@@ -55,10 +55,10 @@ class DataPoint(SQLBase):
         "sample_id", Integer, ForeignKey("sample.id", ondelete="CASCADE")
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<DataPoint(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile}, group={self.group.name}, brand={self.brand.name}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy}, stock={self.stock}, request_count={self.request_count}, request_language_count={self.request_language_count}, request_city_count={self.request_city_count}, request_date_count={self.request_date_count}, request_mobile_count={self.request_mobile_count}, price={self.price}, response_id={self.response_id}, sample_id={self.sample_id})>"
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod
@@ -120,7 +120,7 @@ class DataPoint(SQLBase):
         session.commit()
 
     @classmethod
-    def load_dataset(cls, session: SQLSession):
+    def load_dataset(cls, session: SQLSession) -> tuple[pd.DataFrame, pd.DataFrame]:
         rows = session.execute(
             select(
                 cls.language,
@@ -159,5 +159,5 @@ class DataPoint(SQLBase):
             ]
         ]
         df_x = df.drop("price", axis=1)
-        df_y = df["price"]
+        df_y = df[["price"]]
         return df_x, df_y

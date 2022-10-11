@@ -19,10 +19,10 @@ class Response(SQLBase):
     price = Column("price", Integer)
     stock = Column("stock", Integer)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Response(id={self.id}, request_id={self.request_id}, hotel_id={self.hotel_id}, price={self.price}, stock={self.stock})>"
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod

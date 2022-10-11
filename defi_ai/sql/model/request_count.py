@@ -13,5 +13,5 @@ class RequestCount(SQLBase):
     date = Column("date", Date, primary_key=True)
     count = Column("count", Integer)
 
-    def __repr__(self: RequestCount) -> str:
+    def __repr__(self) -> str:
         return f"<RequestCount(date={self.date}, count={self.count})>"

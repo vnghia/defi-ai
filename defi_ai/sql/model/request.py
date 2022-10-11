@@ -23,10 +23,10 @@ class Request(SQLBase):
     date = Column("date", Integer)
     mobile = Column("mobile", Boolean)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Request(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile})>"
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod
@@ -38,7 +38,7 @@ class Request(SQLBase):
         city: City,
         date: int,
         mobile: bool,
-    ):
+    ) -> Column[Integer]:
         avatar_name = session.get(Avatar, avatar_id).name
         prices = scrape.get_pricing(avatar_name, language, city, date, mobile)
         req = cls(

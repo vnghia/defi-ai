@@ -21,10 +21,10 @@ class Hotel(SQLBase):
     pool = Column("pool", Boolean)
     children_policy = Column("children_policy", Integer)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Hotel(id={self.id}, group={self.group.name}, brand={self.brand.name}, city={self.city}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy})>"
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod

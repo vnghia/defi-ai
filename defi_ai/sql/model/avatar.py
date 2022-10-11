@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from defi_ai import scrape
 from defi_ai.sql.base import SQLBase
 from defi_ai.type import SQLSession
@@ -15,14 +17,14 @@ class Avatar(SQLBase):
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(32))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Avatar(id={self.id}, name={self.name})>"
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod
-    def new(cls, session: SQLSession, name: str = None):
+    def new(cls, session: SQLSession, name: str = None) -> Column[Integer]:
         if name is None:
             name = str(
                 int(
@@ -39,7 +41,7 @@ class Avatar(SQLBase):
         return avatar.id
 
     @staticmethod
-    def list_online():
+    def list_online() -> list[tuple[int, str]]:
         return scrape.list_users()
 
     @classmethod
@@ -50,5 +52,5 @@ class Avatar(SQLBase):
         session.commit()
 
     @classmethod
-    def from_name(cls, session: SQLSession, name: str):
+    def from_name(cls, session: SQLSession, name: str) -> Optional[int]:
         return session.execute(select(cls.id).filter(cls.name == name)).scalar()
