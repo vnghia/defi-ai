@@ -14,7 +14,7 @@ cities = [
     "vilnius",
 ]
 
-City = enum.Enum("City", cities)
+City = enum.IntEnum("City", cities)
 
 languages = [
     "austrian",
@@ -46,9 +46,9 @@ languages = [
     "swedish",
 ]
 
-Language = enum.Enum("Language", languages)
+Language = enum.IntEnum("Language", languages)
 
 df_hotel = pd.read_csv("dataset/features_hotels.csv")
 
-HotelGroup = enum.Enum("HotelGroup", sorted(df_hotel["group"].unique()))
-HotelBrand = enum.Enum("HotelBrand", sorted(df_hotel["brand"].unique()))
+HotelGroup = enum.IntEnum("HotelGroup", sorted(df_hotel["group"].unique()))
+HotelBrand = enum.IntEnum("HotelBrand", sorted(df_hotel["brand"].unique()))
