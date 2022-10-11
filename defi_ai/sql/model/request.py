@@ -8,9 +8,9 @@ from defi_ai import scrape
 from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.response import Response
+from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer
 from sqlalchemy.orm import relationship
-from defi_ai.type import City, Language, SQLSession
 
 
 class Request(SQLBase):
@@ -69,7 +69,3 @@ class Request(SQLBase):
         else:
             session.refresh(req)
             return req
-
-    @classmethod
-    def list(cls, session: SQLSession):
-        return session.query(cls).all()

@@ -5,9 +5,9 @@
 from __future__ import annotations
 
 from defi_ai.sql.base import SQLBase
+from defi_ai.type import SQLSession
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
-from defi_ai.type import SQLSession
 
 
 class Response(SQLBase):
@@ -44,7 +44,3 @@ class Response(SQLBase):
             )
         session.add_all(results)
         return results
-
-    @classmethod
-    def list(cls, session: SQLSession):
-        return session.query(cls).all()

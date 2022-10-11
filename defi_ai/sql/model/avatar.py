@@ -7,7 +7,7 @@ from __future__ import annotations
 from defi_ai import scrape
 from defi_ai.sql.base import SQLBase
 from defi_ai.type import SQLSession
-from sqlalchemy import Column, Integer, String, func
+from sqlalchemy import Column, Integer, String, func, select
 from sqlalchemy.orm import relationship
 
 
@@ -31,7 +31,7 @@ class Avatar(SQLBase):
             name = str(
                 int(
                     session.get(
-                        Avatar, session.query(func.max(Avatar.id)).scalar()
+                        Avatar, session.execute(select(func.max(Avatar.id))).scalar()
                     ).name
                 )
                 + 1
@@ -40,12 +40,7 @@ class Avatar(SQLBase):
         avatar = cls(id=id, name=name)
         session.add(avatar)
         session.commit()
-        session.refresh(avatar)
-        return avatar
-
-    @classmethod
-    def list(cls, session: SQLSession):
-        return session.query(cls).all()
+        return avatar.id
 
     @staticmethod
     def list_online():
@@ -60,4 +55,4 @@ class Avatar(SQLBase):
 
     @classmethod
     def from_name(cls, session: SQLSession, name: str):
-        return session.query(cls).filter(cls.name == name).one()
+        return session.execute(select(cls.id).filter(cls.name == name)).scalar()

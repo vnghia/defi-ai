@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from defi_ai.sql.base import SQLBase
 from sqlalchemy import Column, Date, Integer
-from defi_ai.type import SQLSession
 
 
 class RequestCount(SQLBase):
@@ -16,7 +15,3 @@ class RequestCount(SQLBase):
 
     def __repr__(self: RequestCount) -> str:
         return f"<RequestCount(date={self.date}, count={self.count})>"
-
-    @classmethod
-    def list(cls: type[RequestCount], session: SQLSession):
-        return session.query(cls).all()

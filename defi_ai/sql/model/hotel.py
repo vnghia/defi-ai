@@ -6,9 +6,9 @@ from __future__ import annotations
 
 import pandas as pd
 from defi_ai.sql.base import SQLBase
+from defi_ai.type import City, HotelBrand, HotelGroup, SQLSession
 from sqlalchemy import Boolean, CheckConstraint, Column, Enum, Integer
 from sqlalchemy.orm import relationship
-from defi_ai.type import City, HotelBrand, HotelGroup, SQLSession
 
 
 class Hotel(SQLBase):
@@ -30,10 +30,6 @@ class Hotel(SQLBase):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
-
-    @classmethod
-    def list(cls, session: SQLSession):
-        return session.query(cls).all()
 
     @classmethod
     def update(cls, session: SQLSession):

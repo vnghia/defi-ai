@@ -25,10 +25,6 @@ class Sample(SQLBase):
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod
-    def list(cls, session: SQLSession):
-        return session.query(cls).all()
-
-    @classmethod
     def update(cls, session: SQLSession):
         df = pd.read_csv("dataset/test_set.csv").rename(columns={"index": "id"})
         df.to_sql(cls.__tablename__, session.bind, if_exists="append", index=False)

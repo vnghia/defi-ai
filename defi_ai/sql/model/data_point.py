@@ -6,11 +6,20 @@ from __future__ import annotations
 
 import pandas as pd
 from defi_ai.sql.base import SQLBase
+from defi_ai.sql.model.hotel import Hotel
 from defi_ai.sql.model.request import Request
 from defi_ai.sql.model.response import Response
-from defi_ai.sql.model.hotel import Hotel
-from sqlalchemy import Boolean, CheckConstraint, Column, Enum, ForeignKey, Integer, func
 from defi_ai.type import City, HotelBrand, HotelGroup, Language, SQLSession
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    Enum,
+    ForeignKey,
+    Integer,
+    func,
+    select,
+)
 
 
 class DataPoint(SQLBase):
@@ -54,8 +63,10 @@ class DataPoint(SQLBase):
 
     @classmethod
     def update_from_response(cls, session: SQLSession):
-        current_response_id = session.query(func.max(cls.response_id)).scalar() or 0
-        subq_count = session.query(
+        current_response_id = (
+            session.execute(select(func.max(cls.response_id))).scalar() or 0
+        )
+        subq_count = select(
             Request.id,
             func.rank()
             .over(partition_by=Request.avatar_id, order_by=Request.id)
@@ -79,8 +90,8 @@ class DataPoint(SQLBase):
             )
             .label("request_mobile_count"),
         ).subquery()
-        next_responses = (
-            session.query(
+        next_responses = session.execute(
+            select(
                 Request.avatar_id,
                 Request.language,
                 Request.city,
@@ -103,16 +114,15 @@ class DataPoint(SQLBase):
             .join(Response.hotel)
             .join(Response.request)
             .join(subq_count, Request.id == subq_count.c.id)
-            .filter(Response.id >= current_response_id)
-            .all()
-        )
+            .filter(Response.id > current_response_id)
+        ).all()
         session.add_all([cls(**response._mapping) for response in next_responses])
         session.commit()
 
     @classmethod
     def load_dataset(cls, session: SQLSession):
-        rows = (
-            session.query(
+        rows = session.execute(
+            select(
                 cls.language,
                 cls.city,
                 cls.date,
@@ -127,10 +137,8 @@ class DataPoint(SQLBase):
                 cls.request_date_count,
                 cls.request_mobile_count,
                 cls.price,
-            )
-            .filter(cls.response_id.is_not(None))
-            .all()
-        )
+            ).filter(cls.response_id.is_not(None))
+        ).all()
         df = pd.DataFrame([row._mapping for row in rows])
         df = df[
             [
