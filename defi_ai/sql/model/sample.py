@@ -40,7 +40,7 @@ class Sample(SQLBase):
     request_mobile_count = Column("request_mobile_count", Integer)
 
     scrape_request_id = Column(
-        "request_id", Integer, ForeignKey("hotel.id", ondelete="SET NULL")
+        "request_id", Integer, ForeignKey("request.id", ondelete="SET NULL")
     )
     hotel_id = Column("hotel_id", Integer, ForeignKey("hotel.id"))
     hotel = relationship("Hotel")
