@@ -25,10 +25,12 @@ from sqlalchemy import (
 class DataPoint(SQLBase):
     __tablename__ = "data_point"
     __table_args__ = (CheckConstraint("0 <= children_policy AND children_policy <= 2"),)
+
     id = Column("id", Integer, primary_key=True)
     avatar_id = Column(
         "avatar_id", Integer, ForeignKey("avatar.id", ondelete="CASCADE")
     )
+
     language = Column("language", Enum(Language))
     city = Column("city", Enum(City))
     date = Column("date", Integer)
@@ -51,18 +53,15 @@ class DataPoint(SQLBase):
     response_id = Column(
         "response_id", Integer, ForeignKey("response.id", ondelete="CASCADE")
     )
-    sample_id = Column(
-        "sample_id", Integer, ForeignKey("sample.id", ondelete="CASCADE")
-    )
 
     def __repr__(self) -> str:
-        return f"<DataPoint(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile}, group={self.group.name}, brand={self.brand.name}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy}, stock={self.stock}, request_count={self.request_count}, request_language_count={self.request_language_count}, request_city_count={self.request_city_count}, request_date_count={self.request_date_count}, request_mobile_count={self.request_mobile_count}, price={self.price}, response_id={self.response_id}, sample_id={self.sample_id})>"
+        return f"<DataPoint(id={self.id}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile}, group={self.group.name}, brand={self.brand.name}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy}, stock={self.stock}, request_count={self.request_count}, request_language_count={self.request_language_count}, request_city_count={self.request_city_count}, request_date_count={self.request_date_count}, request_mobile_count={self.request_mobile_count}, price={self.price}, response_id={self.response_id})>"
 
     def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
 
     @classmethod
-    def update_from_response(cls, session: SQLSession):
+    def update(cls, session: SQLSession):
         current_response_id = (
             session.execute(select(func.max(cls.response_id))).scalar() or 0
         )
@@ -137,7 +136,7 @@ class DataPoint(SQLBase):
                 cls.request_date_count,
                 cls.request_mobile_count,
                 cls.price,
-            ).filter(cls.response_id.is_not(None))
+            )
         ).all()
         df = pd.DataFrame([row._mapping for row in rows])
         df = df[
