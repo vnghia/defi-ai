@@ -136,7 +136,7 @@ class DataPoint(SQLBase):
                 cls.request_date_count,
                 cls.request_mobile_count,
                 cls.price,
-            )
+            ).distinct()
         ).all()
         df = pd.DataFrame([row._mapping for row in rows])
         df = df[
