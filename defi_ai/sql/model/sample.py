@@ -1,6 +1,8 @@
 import pandas as pd
 from defi_ai.sql.base import SQLBase
+from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.hotel import Hotel
+from defi_ai.sql.model.request import Request
 from defi_ai.type import City, HotelBrand, HotelGroup, Language, SQLSession
 from sqlalchemy import (
     Boolean,
@@ -10,6 +12,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     select,
+    update,
 )
 from sqlalchemy.orm import relationship
 
@@ -98,3 +101,40 @@ class Sample(SQLBase):
             on="order_requests",
         )
         df.to_sql(cls.__tablename__, session.bind, if_exists="append", index=False)
+
+    @classmethod
+    def scrape(cls, session: SQLSession):
+        next_order_requests = session.execute(
+            select(cls.order_requests)
+            .where(cls.scrape_request_id.is_(None))
+            .order_by(cls.order_requests)
+            .offset(1)
+        ).scalar()
+        params = session.execute(
+            select(
+                cls.order_requests,
+                cls.avatar_id,
+                cls.language,
+                cls.city,
+                cls.date,
+                cls.mobile,
+            )
+            .distinct()
+            .order_by(cls.order_requests)
+            .where(cls.order_requests >= next_order_requests)
+        ).all()
+        for param in params:
+            req_id = Request.send(
+                session,
+                Avatar.from_name(session, f"sample-avatar-{param[1]}"),
+                param[2],
+                param[3],
+                param[4],
+                param[5],
+            )
+            session.execute(
+                update(cls)
+                .where(cls.order_requests == param[0])
+                .values(scrape_request_id=req_id)
+            )
+            session.commit()
