@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import DeclarativeMeta
-
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 SQLBase: type[DeclarativeMeta] = declarative_base()
