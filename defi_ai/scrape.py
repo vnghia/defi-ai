@@ -46,12 +46,12 @@ def list_users() -> list[tuple[int, str]]:
 
 
 def get_pricing(
+    session: SQLSession,
     name: str,
     language: Language,
     city: City,
     date: int,
     mobile: bool,
-    session: SQLSession,
 ) -> list[dict[str, int]]:
     update_request_count(session)
     params = {

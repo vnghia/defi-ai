@@ -48,7 +48,7 @@ class Request(SQLBase):
         mobile: bool,
     ) -> Column[Integer]:
         avatar_name = session.get(Avatar, avatar_id).name
-        prices = scrape.get_pricing(avatar_name, language, city, date, mobile)
+        prices = scrape.get_pricing(session, avatar_name, language, city, date, mobile)
         req = cls(
             avatar_id=avatar_id,
             language=language,
