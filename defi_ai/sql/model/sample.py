@@ -138,3 +138,46 @@ class Sample(SQLBase):
                 .values(scrape_request_id=req_id)
             )
             session.commit()
+
+    @classmethod
+    def load_dataset(cls, session: SQLSession) -> pd.DataFrame:
+        rows = session.execute(
+            select(
+                cls.language,
+                cls.city,
+                cls.date,
+                cls.mobile,
+                cls.group,
+                cls.brand,
+                cls.parking,
+                cls.pool,
+                cls.children_policy,
+                cls.stock,
+                cls.request_count,
+                cls.request_language_count,
+                cls.request_city_count,
+                cls.request_date_count,
+                cls.request_mobile_count,
+            ).order_by(cls.id)
+        ).all()
+        df = pd.DataFrame([row._mapping for row in rows])
+        df = df[
+            [
+                "language",
+                "city",
+                "date",
+                "mobile",
+                "group",
+                "brand",
+                "parking",
+                "pool",
+                "children_policy",
+                "stock",
+                "request_count",
+                "request_language_count",
+                "request_city_count",
+                "request_date_count",
+                "request_mobile_count",
+            ]
+        ]
+        return df
