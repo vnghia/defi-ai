@@ -15,7 +15,7 @@ from sqlalchemy.orm import relationship
 
 class Avatar(SQLBase):
     __tablename__ = "avatar"
-    id = Column("id", Integer, primary_key=True)
+    id = Column("id", Integer, primary_key=True, autoincrement=False)
     name = Column("name", String(32))
     requests = relationship(
         "Request", back_populates="avatar", cascade="all, delete", passive_deletes=True
