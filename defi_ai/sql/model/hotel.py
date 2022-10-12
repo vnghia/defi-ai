@@ -36,4 +36,6 @@ class Hotel(SQLBase):
         df = pd.read_csv("dataset/features_hotels.csv").rename(
             columns={"hotel_id": "id"}
         )
+        df["parking"] = df["parking"].astype(bool)
+        df["pool"] = df["pool"].astype(bool)
         df.to_sql(cls.__tablename__, session.bind, if_exists="append", index=False)

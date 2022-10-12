@@ -29,4 +29,5 @@ class Sample(SQLBase):
     @classmethod
     def update(cls, session: SQLSession):
         df = pd.read_csv("dataset/test_set.csv").rename(columns={"index": "id"})
+        df["mobile"] = df["mobile"].astype(bool)
         df.to_sql(cls.__tablename__, session.bind, if_exists="append", index=False)

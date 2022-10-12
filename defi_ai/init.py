@@ -28,7 +28,7 @@ def create_engine_and_table(
     database: str,
 ) -> SQLEngine:
     connection_uri = sqlalchemy.engine.URL.create(
-        "mysql",
+        "postgresql",
         username=username,
         password=password,
         host=host,
