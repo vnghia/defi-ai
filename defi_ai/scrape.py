@@ -64,3 +64,9 @@ def get_pricing(
     r = requests.get(get_url("pricing", USER_ID), params=params)
     r.raise_for_status()
     return r.json()["prices"]
+
+
+def remaining_request():
+    r = requests.get(get_url("remaining-requests", USER_ID))
+    r.raise_for_status()
+    return int(r.text)
