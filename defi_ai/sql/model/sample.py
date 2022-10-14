@@ -7,6 +7,7 @@ from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.hotel import Hotel
 from defi_ai.sql.model.request import Request
+from defi_ai.sql.utils import execute_to_df
 from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import (
     Boolean,
@@ -137,9 +138,4 @@ class Sample(SQLBase):
             .join(request_count_subq, request_table.id == request_count_subq.c.id)
             .order_by(cls.id)
         )
-        rows = session.execute(statement).all()
-        df = pd.DataFrame(
-            [row._mapping for row in rows],
-            columns=[c.name for c in statement.selected_columns],
-        )
-        return df
+        return execute_to_df(statement, session)
