@@ -6,7 +6,7 @@ import pandas as pd
 from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.request import Request
-from defi_ai.sql.utils import execute_to_df
+from defi_ai.sql.utils import execute_to_df, is_kaggle
 from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import (
     Boolean,
@@ -93,21 +93,34 @@ class Sample(SQLBase):
 
     @classmethod
     def load_dataset(cls, session: SQLSession) -> pd.DataFrame:
-        request_table = aliased(
-            Request,
-            select(
-                Sample.order_requests.label("id"),
-                Sample.avatar_id,
-                Sample.language,
-                Sample.city,
-                Sample.date,
-                Sample.mobile,
+        if not is_kaggle:
+            request_table = aliased(
+                Request,
+                select(
+                    Sample.order_requests.label("id"),
+                    Sample.avatar_id,
+                    Sample.language,
+                    Sample.city,
+                    Sample.date,
+                    Sample.mobile,
+                )
+                .distinct()
+                .subquery(),
+                adapt_on_names=True,
             )
-            .distinct()
-            .subquery(),
-            adapt_on_names=True,
-        )
-        statement = Request.get_dataset_statement(request_table, Sample).order_by(
-            Sample.id
-        )
+            statement = Request.get_dataset_statement(request_table, Sample).order_by(
+                Sample.id
+            )
+        else:
+            statement = """SELECT anon_1.language, anon_1.city, anon_1.date, anon_1.mobile, hotel."group", hotel.brand, hotel.parking, hotel.pool, hotel.children_policy, sample.stock, anon_2.request_count, anon_2.request_language_count, anon_2.request_city_count, anon_2.request_date_count, anon_2.request_mobile_count, anon_3.hotel_city_count, anon_3.hotel_brand_count, anon_3.hotel_group_count, anon_3.hotel_city_group_count, anon_3.hotel_city_brand_count 
+FROM sample JOIN hotel ON sample.hotel_id = hotel.id JOIN (SELECT hotel.id AS id, anon_4.count_1 AS hotel_city_count, anon_5.count_2 AS hotel_brand_count, anon_6.count_3 AS hotel_group_count, anon_7.count_4 AS hotel_city_group_count, anon_8.count_5 AS hotel_city_brand_count 
+FROM hotel JOIN (SELECT hotel.city AS city, count(*) AS count_1 
+FROM hotel GROUP BY hotel.city) AS anon_4 ON hotel.city = anon_4.city JOIN (SELECT hotel.brand AS brand, count(*) AS count_2 
+FROM hotel GROUP BY hotel.brand) AS anon_5 ON hotel.brand = anon_5.brand JOIN (SELECT hotel."group" AS "group", count(*) AS count_3 
+FROM hotel GROUP BY hotel."group") AS anon_6 ON hotel."group" = anon_6."group" JOIN (SELECT hotel.city AS city, hotel."group" AS "group", count(*) AS count_4 
+FROM hotel GROUP BY hotel.city, hotel."group") AS anon_7 ON hotel.city = anon_7.city AND hotel."group" = anon_7."group" JOIN (SELECT hotel.city AS city, hotel.brand AS brand, count(*) AS count_5 
+FROM hotel GROUP BY hotel.city, hotel.brand) AS anon_8 ON hotel.city = anon_8.city AND hotel.brand = anon_8.brand) AS anon_3 ON sample.hotel_id = anon_3.id JOIN (SELECT DISTINCT sample.order_requests AS id, sample.avatar_id AS avatar_id, sample.language AS language, sample.city AS city, sample.date AS date, sample.mobile AS mobile 
+FROM sample) AS anon_1 ON sample.order_requests = anon_1.id JOIN (SELECT anon_1.id AS id, rank() OVER (PARTITION BY anon_1.avatar_id ORDER BY anon_1.id) AS request_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.language ORDER BY anon_1.id) AS request_language_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.city ORDER BY anon_1.id) AS request_city_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.date ORDER BY anon_1.id) AS request_date_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.mobile ORDER BY anon_1.id) AS request_mobile_count 
+FROM (SELECT DISTINCT sample.order_requests AS id, sample.avatar_id AS avatar_id, sample.language AS language, sample.city AS city, sample.date AS date, sample.mobile AS mobile 
+FROM sample) AS anon_1) AS anon_2 ON anon_1.id = anon_2.id ORDER BY sample.id"""
         return execute_to_df(session, statement)
