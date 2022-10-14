@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022-present Vo Van Nghia <vanvnghia@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
 import pandas as pd
 from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
