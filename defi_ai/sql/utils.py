@@ -7,7 +7,7 @@ from defi_ai.type import SQLSession
 from sqlalchemy.sql.selectable import Select
 
 
-def execute_to_df(statement: Select, session: SQLSession):
+def execute_to_df(session: SQLSession, statement: Select):
     rows = session.execute(statement).all()
     df = pd.DataFrame(
         [row._mapping for row in rows],

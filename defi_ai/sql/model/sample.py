@@ -138,4 +138,4 @@ class Sample(SQLBase):
             .join(request_count_subq, request_table.id == request_count_subq.c.id)
             .order_by(cls.id)
         )
-        return execute_to_df(statement, session)
+        return execute_to_df(session, statement)
