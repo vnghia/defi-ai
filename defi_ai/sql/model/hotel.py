@@ -51,15 +51,19 @@ class Hotel(SQLBase):
 
     @classmethod
     def get_count_statement(cls):
-        city_count = select(cls.city, func.count()).group_by(cls.city).subquery()
-        brand_count = select(cls.brand, func.count()).group_by(cls.brand).subquery()
-        group_count = select(cls.group, func.count()).group_by(cls.group).subquery()
-        city_group_count = (
+        hotel_city_count = select(cls.city, func.count()).group_by(cls.city).subquery()
+        hotel_brand_count = (
+            select(cls.brand, func.count()).group_by(cls.brand).subquery()
+        )
+        hotel_group_count = (
+            select(cls.group, func.count()).group_by(cls.group).subquery()
+        )
+        hotel_city_group_count = (
             select(cls.city, cls.group, func.count())
             .group_by(cls.city, cls.group)
             .subquery()
         )
-        city_brand_count = (
+        hotel_city_brand_count = (
             select(cls.city, cls.brand, func.count())
             .group_by(cls.city, cls.brand)
             .subquery()
@@ -67,27 +71,27 @@ class Hotel(SQLBase):
         return (
             select(
                 cls.id,
-                city_count.c.count.label("city_count"),
-                brand_count.c.count.label("brand_count"),
-                group_count.c.count.label("group_count"),
-                city_group_count.c.count.label("city_group_count"),
-                city_brand_count.c.count.label("city_brand_count"),
+                hotel_city_count.c.count.label("hotel_city_count"),
+                hotel_brand_count.c.count.label("hotel_brand_count"),
+                hotel_group_count.c.count.label("hotel_group_count"),
+                hotel_city_group_count.c.count.label("hotel_city_group_count"),
+                hotel_city_brand_count.c.count.label("hotel_city_brand_count"),
             )
-            .join(city_count, cls.city == city_count.c.city)
-            .join(brand_count, cls.brand == brand_count.c.brand)
-            .join(group_count, cls.group == group_count.c.group)
+            .join(hotel_city_count, cls.city == hotel_city_count.c.city)
+            .join(hotel_brand_count, cls.brand == hotel_brand_count.c.brand)
+            .join(hotel_group_count, cls.group == hotel_group_count.c.group)
             .join(
-                city_group_count,
+                hotel_city_group_count,
                 and_(
-                    cls.city == city_group_count.c.city,
-                    cls.group == city_group_count.c.group,
+                    cls.city == hotel_city_group_count.c.city,
+                    cls.group == hotel_city_group_count.c.group,
                 ),
             )
             .join(
-                city_brand_count,
+                hotel_city_brand_count,
                 and_(
-                    cls.city == city_brand_count.c.city,
-                    cls.brand == city_brand_count.c.brand,
+                    cls.city == hotel_city_brand_count.c.city,
+                    cls.brand == hotel_city_brand_count.c.brand,
                 ),
             )
         )
