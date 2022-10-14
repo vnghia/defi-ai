@@ -14,7 +14,7 @@ from sqlalchemy import (
     select,
     update,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import aliased, relationship
 
 
 class Sample(SQLBase):
@@ -36,12 +36,6 @@ class Sample(SQLBase):
     children_policy = Column("children_policy", Integer)
     stock = Column("stock", Integer)
 
-    request_count = Column("request_count", Integer)
-    request_language_count = Column("request_language_count", Integer)
-    request_city_count = Column("request_city_count", Integer)
-    request_date_count = Column("request_date_count", Integer)
-    request_mobile_count = Column("request_mobile_count", Integer)
-
     scrape_request_id = Column(
         "scrape_request_id", Integer, ForeignKey("request.id", ondelete="SET NULL")
     )
@@ -49,7 +43,7 @@ class Sample(SQLBase):
     hotel = relationship("Hotel")
 
     def __repr__(self) -> str:
-        return f"<Sample(id={self.id}, order_requests={self.order_requests}, avatar_id={self.avatar_id}, language={self.language}, city={self.city}, date={self.date}, mobile={self.mobile}, group={self.group.name}, brand={self.brand.name}, parking={self.parking}, pool={self.pool}, children_policy={self.children_policy}, stock={self.stock}, request_count={self.request_count}, request_language_count={self.request_language_count}, request_city_count={self.request_city_count}, request_date_count={self.request_date_count}, request_mobile_count={self.request_mobile_count}, hotel_id={self.hotel_id})>"
+        return f"<Sample(id={self.id}, order_requests={self.order_requests}, city={self.city}, date={self.date}, language={self.language}, mobile={self.mobile}, avatar_id={self.avatar_id}, hotel_id={self.hotel_id}, stock={self.stock})>"
 
     def to_dict(self) -> dict:
         return {c.name: getattr(self, c.name) for c in self.__table__.c}
@@ -58,48 +52,6 @@ class Sample(SQLBase):
     def update(cls, session: SQLSession):
         df = pd.read_csv("dataset/test_set.csv").rename(columns={"index": "id"})
         df["mobile"] = df["mobile"].astype(bool)
-        df_hotel = pd.DataFrame(
-            [
-                row._mapping
-                for row in session.execute(
-                    select(
-                        Hotel.group,
-                        Hotel.brand,
-                        Hotel.parking,
-                        Hotel.pool,
-                        Hotel.children_policy,
-                    ).order_by(Hotel.id)
-                ).all()
-            ]
-        )
-        df = df.join(df_hotel, on="hotel_id")
-        df["brand"] = df["brand"].apply(lambda x: HotelBrand(x).name)
-        df["group"] = df["group"].apply(lambda x: HotelGroup(x).name)
-        df_count = df[
-            ["avatar_id", "order_requests", "language", "city", "date", "mobile"]
-        ].drop_duplicates("order_requests")
-        df_count["request_count"] = (
-            df_count.groupby(["avatar_id"])["order_requests"].rank("min").astype(int)
-        )
-        for i in ["language", "city", "date", "mobile"]:
-            df_count[f"request_{i}_count"] = (
-                df_count.groupby(["avatar_id", i])["order_requests"]
-                .rank("min")
-                .astype(int)
-            )
-        df = df.join(
-            df_count[
-                [
-                    "order_requests",
-                    "request_count",
-                    "request_language_count",
-                    "request_city_count",
-                    "request_date_count",
-                    "request_mobile_count",
-                ]
-            ].set_index("order_requests"),
-            on="order_requests",
-        )
         df.to_sql(cls.__tablename__, session.bind, if_exists="append", index=False)
 
     @classmethod
@@ -141,7 +93,23 @@ class Sample(SQLBase):
 
     @classmethod
     def load_dataset(cls, session: SQLSession) -> pd.DataFrame:
-        rows = session.execute(
+        request_table = aliased(
+            Request,
+            select(
+                Sample.order_requests.label("id"),
+                Sample.avatar_id,
+                Sample.language,
+                Sample.city,
+                Sample.date,
+                Sample.mobile,
+            )
+            .distinct()
+            .subquery(),
+            adapt_on_names=True,
+        )
+        hotel_count_subq = Hotel.get_count_statement().subquery()
+        request_count_subq = Request.get_count_statement(request_table).subquery()
+        statement = (
             select(
                 cls.language,
                 cls.city,
@@ -153,31 +121,25 @@ class Sample(SQLBase):
                 cls.pool,
                 cls.children_policy,
                 cls.stock,
-                cls.request_count,
-                cls.request_language_count,
-                cls.request_city_count,
-                cls.request_date_count,
-                cls.request_mobile_count,
-            ).order_by(cls.id)
-        ).all()
-        df = pd.DataFrame([row._mapping for row in rows])
-        df = df[
-            [
-                "language",
-                "city",
-                "date",
-                "mobile",
-                "group",
-                "brand",
-                "parking",
-                "pool",
-                "children_policy",
-                "stock",
-                "request_count",
-                "request_language_count",
-                "request_city_count",
-                "request_date_count",
-                "request_mobile_count",
-            ]
-        ]
+                request_count_subq.c.request_count,
+                request_count_subq.c.request_language_count,
+                request_count_subq.c.request_city_count,
+                request_count_subq.c.request_date_count,
+                request_count_subq.c.request_mobile_count,
+                hotel_count_subq.c.hotel_city_count,
+                hotel_count_subq.c.hotel_brand_count,
+                hotel_count_subq.c.hotel_group_count,
+                hotel_count_subq.c.hotel_city_group_count,
+                hotel_count_subq.c.hotel_city_brand_count,
+            )
+            .join(hotel_count_subq, cls.hotel_id == hotel_count_subq.c.id)
+            .join(request_table, cls.order_requests == request_table.id)
+            .join(request_count_subq, request_table.id == request_count_subq.c.id)
+            .order_by(cls.id)
+        )
+        rows = session.execute(statement).all()
+        df = pd.DataFrame(
+            [row._mapping for row in rows],
+            columns=[c.name for c in statement.selected_columns],
+        )
         return df

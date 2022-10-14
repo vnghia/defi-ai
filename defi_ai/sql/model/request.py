@@ -4,13 +4,16 @@
 
 from __future__ import annotations
 
+from typing import Union
+
 from defi_ai import scrape
 from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.response import Response
 from defi_ai.type import City, Language, SQLSession
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, func, select
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.util import AliasedClass
 
 
 class Request(SQLBase):
@@ -62,3 +65,30 @@ class Request(SQLBase):
         Response.from_list(session, req.id, prices)
         session.commit()
         return req.id
+
+    @staticmethod
+    def get_count_statement(request: Union[Request, AliasedClass]):
+        return select(
+            request.id,
+            func.rank()
+            .over(partition_by=request.avatar_id, order_by=request.id)
+            .label("request_count"),
+            func.rank()
+            .over(
+                partition_by=[request.avatar_id, request.language],
+                order_by=request.id,
+            )
+            .label("request_language_count"),
+            func.rank()
+            .over(partition_by=[request.avatar_id, request.city], order_by=request.id)
+            .label("request_city_count"),
+            func.rank()
+            .over(partition_by=[request.avatar_id, request.date], order_by=request.id)
+            .label("request_date_count"),
+            func.rank()
+            .over(
+                partition_by=[request.avatar_id, request.mobile],
+                order_by=request.id,
+            )
+            .label("request_mobile_count"),
+        )
