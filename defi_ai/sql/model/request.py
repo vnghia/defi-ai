@@ -151,7 +151,33 @@ FROM hotel GROUP BY hotel."group") AS anon_5 ON hotel."group" = anon_5."group" J
 FROM hotel GROUP BY hotel.city, hotel."group") AS anon_6 ON hotel.city = anon_6.city AND hotel."group" = anon_6."group" JOIN (SELECT hotel.city AS city, hotel.brand AS brand, count(*) AS count_5 
 FROM hotel GROUP BY hotel.city, hotel.brand) AS anon_7 ON hotel.city = anon_7.city AND hotel.brand = anon_7.brand) AS anon_2 ON response.hotel_id = anon_2.id JOIN request ON response.request_id = request.id JOIN (SELECT request.id AS id, rank() OVER (PARTITION BY request.avatar_id ORDER BY request.id) AS request_count, rank() OVER (PARTITION BY request.avatar_id, request.language ORDER BY request.id) AS request_language_count, rank() OVER (PARTITION BY request.avatar_id, request.city ORDER BY request.id) AS request_city_count, rank() OVER (PARTITION BY request.avatar_id, request.date ORDER BY request.id) AS request_date_count, rank() OVER (PARTITION BY request.avatar_id, request.mobile ORDER BY request.id) AS request_mobile_count 
 FROM request) AS anon_1 ON request.id = anon_1.id ORDER BY response.id"""
-        df = execute_to_df(session, statement)
+        df = execute_to_df(
+            session,
+            statement,
+            [
+                "language",
+                "city",
+                "date",
+                "mobile",
+                "group",
+                "brand",
+                "parking",
+                "pool",
+                "children_policy",
+                "stock",
+                "request_count",
+                "request_language_count",
+                "request_city_count",
+                "request_date_count",
+                "request_mobile_count",
+                "hotel_city_count",
+                "hotel_brand_count",
+                "hotel_group_count",
+                "hotel_city_group_count",
+                "hotel_city_brand_count",
+                "price",
+            ],
+        )
         if split_xy:
             return df.drop("price", axis=1), df[["price"]]
         else:
