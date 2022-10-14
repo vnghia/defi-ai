@@ -7,7 +7,7 @@ from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.hotel import Hotel
 from defi_ai.sql.model.request import Request
-from defi_ai.type import City, HotelBrand, HotelGroup, Language, SQLSession
+from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
@@ -33,11 +33,6 @@ class Sample(SQLBase):
     city = Column("city", Enum(City))
     date = Column("date", Integer)
     mobile = Column("mobile", Boolean)
-    group = Column("group", Enum(HotelGroup))
-    brand = Column("brand", Enum(HotelBrand))
-    parking = Column("parking", Boolean)
-    pool = Column("pool", Boolean)
-    children_policy = Column("children_policy", Integer)
     stock = Column("stock", Integer)
 
     scrape_request_id = Column(
@@ -119,11 +114,11 @@ class Sample(SQLBase):
                 cls.city,
                 cls.date,
                 cls.mobile,
-                cls.group,
-                cls.brand,
-                cls.parking,
-                cls.pool,
-                cls.children_policy,
+                Hotel.group,
+                Hotel.brand,
+                Hotel.parking,
+                Hotel.pool,
+                Hotel.children_policy,
                 cls.stock,
                 request_count_subq.c.request_count,
                 request_count_subq.c.request_language_count,
@@ -136,6 +131,7 @@ class Sample(SQLBase):
                 hotel_count_subq.c.hotel_city_group_count,
                 hotel_count_subq.c.hotel_city_brand_count,
             )
+            .join(cls.hotel)
             .join(hotel_count_subq, cls.hotel_id == hotel_count_subq.c.id)
             .join(request_table, cls.order_requests == request_table.id)
             .join(request_count_subq, request_table.id == request_count_subq.c.id)
