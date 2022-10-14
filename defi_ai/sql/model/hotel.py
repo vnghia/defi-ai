@@ -51,22 +51,20 @@ class Hotel(SQLBase):
 
     @classmethod
     def get_count_statement(cls):
-        hotel_city_count = (
-            select(cls.city, func.count("*")).group_by(cls.city).subquery()
-        )
+        hotel_city_count = select(cls.city, func.count()).group_by(cls.city).subquery()
         hotel_brand_count = (
-            select(cls.brand, func.count("*")).group_by(cls.brand).subquery()
+            select(cls.brand, func.count()).group_by(cls.brand).subquery()
         )
         hotel_group_count = (
-            select(cls.group, func.count("*")).group_by(cls.group).subquery()
+            select(cls.group, func.count()).group_by(cls.group).subquery()
         )
         hotel_city_group_count = (
-            select(cls.city, cls.group, func.count("*"))
+            select(cls.city, cls.group, func.count())
             .group_by(cls.city, cls.group)
             .subquery()
         )
         hotel_city_brand_count = (
-            select(cls.city, cls.brand, func.count("*"))
+            select(cls.city, cls.brand, func.count())
             .group_by(cls.city, cls.brand)
             .subquery()
         )
