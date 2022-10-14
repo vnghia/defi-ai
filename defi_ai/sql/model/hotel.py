@@ -7,7 +7,16 @@ from __future__ import annotations
 import pandas as pd
 from defi_ai.sql.base import SQLBase
 from defi_ai.type import City, HotelBrand, HotelGroup, SQLSession
-from sqlalchemy import Boolean, CheckConstraint, Column, Enum, Integer
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    Enum,
+    Integer,
+    func,
+    select,
+    and_,
+)
 from sqlalchemy.orm import relationship
 
 
@@ -39,3 +48,46 @@ class Hotel(SQLBase):
         df["parking"] = df["parking"].astype(bool)
         df["pool"] = df["pool"].astype(bool)
         df.to_sql(cls.__tablename__, session.bind, if_exists="append", index=False)
+
+    @classmethod
+    def get_count_statement(cls):
+        city_count = select(cls.city, func.count()).group_by(cls.city).subquery()
+        brand_count = select(cls.brand, func.count()).group_by(cls.brand).subquery()
+        group_count = select(cls.group, func.count()).group_by(cls.group).subquery()
+        city_group_count = (
+            select(cls.city, cls.group, func.count())
+            .group_by(cls.city, cls.group)
+            .subquery()
+        )
+        city_brand_count = (
+            select(cls.city, cls.brand, func.count())
+            .group_by(cls.city, cls.brand)
+            .subquery()
+        )
+        return (
+            select(
+                cls.id,
+                city_count.c.count.label("city_count"),
+                brand_count.c.count.label("brand_count"),
+                group_count.c.count.label("group_count"),
+                city_group_count.c.count.label("city_group_count"),
+                city_brand_count.c.count.label("city_brand_count"),
+            )
+            .join(city_count, cls.city == city_count.c.city)
+            .join(brand_count, cls.brand == brand_count.c.brand)
+            .join(group_count, cls.group == group_count.c.group)
+            .join(
+                city_group_count,
+                and_(
+                    cls.city == city_group_count.c.city,
+                    cls.group == city_group_count.c.group,
+                ),
+            )
+            .join(
+                city_brand_count,
+                and_(
+                    cls.city == city_brand_count.c.city,
+                    cls.brand == city_brand_count.c.brand,
+                ),
+            )
+        )
