@@ -5,7 +5,6 @@
 import pandas as pd
 from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
-from defi_ai.sql.model.hotel import Hotel
 from defi_ai.sql.model.request import Request
 from defi_ai.sql.utils import execute_to_df
 from defi_ai.type import City, Language, SQLSession
@@ -19,7 +18,7 @@ from sqlalchemy import (
     select,
     update,
 )
-from sqlalchemy.orm import aliased, relationship
+from sqlalchemy.orm import aliased, relationship, synonym
 
 
 class Sample(SQLBase):
@@ -28,6 +27,7 @@ class Sample(SQLBase):
 
     id = Column("id", Integer, primary_key=True, autoincrement=False)
     order_requests = Column("order_requests", Integer)
+    request_id = synonym("order_requests")
     avatar_id = Column("avatar_id", Integer)
 
     language = Column("language", Enum(Language))
@@ -107,35 +107,7 @@ class Sample(SQLBase):
             .subquery(),
             adapt_on_names=True,
         )
-        hotel_count_subq = Hotel.get_count_statement().subquery()
-        request_count_subq = Request.get_count_statement(request_table).subquery()
-        statement = (
-            select(
-                cls.language,
-                cls.city,
-                cls.date,
-                cls.mobile,
-                Hotel.group,
-                Hotel.brand,
-                Hotel.parking,
-                Hotel.pool,
-                Hotel.children_policy,
-                cls.stock,
-                request_count_subq.c.request_count,
-                request_count_subq.c.request_language_count,
-                request_count_subq.c.request_city_count,
-                request_count_subq.c.request_date_count,
-                request_count_subq.c.request_mobile_count,
-                hotel_count_subq.c.hotel_city_count,
-                hotel_count_subq.c.hotel_brand_count,
-                hotel_count_subq.c.hotel_group_count,
-                hotel_count_subq.c.hotel_city_group_count,
-                hotel_count_subq.c.hotel_city_brand_count,
-            )
-            .join(cls.hotel)
-            .join(hotel_count_subq, cls.hotel_id == hotel_count_subq.c.id)
-            .join(request_table, cls.order_requests == request_table.id)
-            .join(request_count_subq, request_table.id == request_count_subq.c.id)
-            .order_by(cls.id)
+        statement = Request.get_dataset_statement(request_table, Sample).order_by(
+            Sample.id
         )
         return execute_to_df(session, statement)

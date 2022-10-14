@@ -6,10 +6,13 @@ from __future__ import annotations
 
 from typing import Union
 
+import pandas as pd
 from defi_ai import scrape
 from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
+from defi_ai.sql.model.hotel import Hotel
 from defi_ai.sql.model.response import Response
+from defi_ai.sql.utils import execute_to_df
 from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, func, select
 from sqlalchemy.orm import relationship
@@ -92,3 +95,47 @@ class Request(SQLBase):
             )
             .label("request_mobile_count"),
         )
+
+    @staticmethod
+    def get_dataset_statement(
+        request: Union[Request, AliasedClass], response: Union[Response, AliasedClass]
+    ):
+        hotel_count_subq = Hotel.get_count_statement().subquery()
+        request_count_subq = Request.get_count_statement(request).subquery()
+        return (
+            select(
+                request.language,
+                request.city,
+                request.date,
+                request.mobile,
+                Hotel.group,
+                Hotel.brand,
+                Hotel.parking,
+                Hotel.pool,
+                Hotel.children_policy,
+                response.stock,
+                request_count_subq.c.request_count,
+                request_count_subq.c.request_language_count,
+                request_count_subq.c.request_city_count,
+                request_count_subq.c.request_date_count,
+                request_count_subq.c.request_mobile_count,
+                hotel_count_subq.c.hotel_city_count,
+                hotel_count_subq.c.hotel_brand_count,
+                hotel_count_subq.c.hotel_group_count,
+                hotel_count_subq.c.hotel_city_group_count,
+                hotel_count_subq.c.hotel_city_brand_count,
+            )
+            .join(Hotel, response.hotel_id == Hotel.id)
+            .join(hotel_count_subq, response.hotel_id == hotel_count_subq.c.id)
+            .join(request, response.request_id == request.id)
+            .join(request_count_subq, request.id == request_count_subq.c.id)
+        )
+
+    @classmethod
+    def load_dataset(cls, session: SQLSession) -> tuple[pd.DataFrame, pd.DataFrame]:
+        statement = (
+            cls.get_dataset_statement(Request, Response)
+            .add_columns(Response.price)
+            .order_by(Response.id)
+        )
+        return execute_to_df(session, statement)

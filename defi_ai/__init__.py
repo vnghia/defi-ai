@@ -4,7 +4,6 @@
 
 from defi_ai.init import init_session  # noqa: F401
 from defi_ai.sql.model.avatar import Avatar  # noqa: F401
-from defi_ai.sql.model.data_point import DataPoint  # noqa: F401
 from defi_ai.sql.model.hotel import Hotel  # noqa: F401
 from defi_ai.sql.model.request import Request  # noqa: F401
 from defi_ai.sql.model.response import Response  # noqa: F401
