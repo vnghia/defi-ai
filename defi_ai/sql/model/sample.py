@@ -123,29 +123,4 @@ FROM hotel GROUP BY hotel.city, hotel.brand) AS anon_8 ON hotel.city = anon_8.ci
 FROM sample) AS anon_1 ON sample.order_requests = anon_1.id JOIN (SELECT anon_1.id AS id, rank() OVER (PARTITION BY anon_1.avatar_id ORDER BY anon_1.id) AS request_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.language ORDER BY anon_1.id) AS request_language_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.city ORDER BY anon_1.id) AS request_city_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.date ORDER BY anon_1.id) AS request_date_count, rank() OVER (PARTITION BY anon_1.avatar_id, anon_1.mobile ORDER BY anon_1.id) AS request_mobile_count 
 FROM (SELECT DISTINCT sample.order_requests AS id, sample.avatar_id AS avatar_id, sample.language AS language, sample.city AS city, sample.date AS date, sample.mobile AS mobile 
 FROM sample) AS anon_1) AS anon_2 ON anon_1.id = anon_2.id ORDER BY sample.id"""
-        return execute_to_df(
-            session,
-            statement,
-            [
-                "language",
-                "city",
-                "date",
-                "mobile",
-                "group",
-                "brand",
-                "parking",
-                "pool",
-                "children_policy",
-                "stock",
-                "request_count",
-                "request_language_count",
-                "request_city_count",
-                "request_date_count",
-                "request_mobile_count",
-                "hotel_city_count",
-                "hotel_brand_count",
-                "hotel_group_count",
-                "hotel_city_group_count",
-                "hotel_city_brand_count",
-            ],
-        )
+        return execute_to_df(session, statement)
