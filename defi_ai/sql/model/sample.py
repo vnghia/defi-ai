@@ -92,7 +92,9 @@ class Sample(SQLBase):
             session.commit()
 
     @classmethod
-    def load_dataset(cls, session: SQLSession) -> pd.DataFrame:
+    def load_dataset(
+        cls, session: SQLSession, convert_category: bool = True
+    ) -> pd.DataFrame:
         request_table = aliased(
             Request,
             select(
@@ -110,4 +112,4 @@ class Sample(SQLBase):
         statement = Request.get_dataset_statement(request_table, Sample).order_by(
             Sample.id
         )
-        return execute_to_df(session, statement)
+        return execute_to_df(session, statement, convert_category)

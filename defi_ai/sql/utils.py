@@ -9,10 +9,16 @@ from defi_ai.type import SQLSession
 from sqlalchemy.sql.selectable import Select
 
 
-def execute_to_df(session: SQLSession, statement: Select):
+def execute_to_df(
+    session: SQLSession, statement: Select, convert_category: bool = True
+):
     rows = session.execute(statement).all()
     df = pd.DataFrame(
         [row._mapping for row in rows],
         columns=[str(c.name) for c in statement.selected_columns],
     )
+    if convert_category:
+        for c in ["language", "city", "group", "brand", "children_policy"]:
+            if c in df.columns:
+                df[c] = df[c].astype("category")
     return df

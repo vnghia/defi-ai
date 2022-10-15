@@ -133,14 +133,14 @@ class Request(SQLBase):
 
     @classmethod
     def load_dataset(
-        cls, session: SQLSession, split_xy: bool = True
+        cls, session: SQLSession, split_xy: bool = True, convert_category: bool = True
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         statement = (
             cls.get_dataset_statement(Request, Response)
             .add_columns(Response.price)
             .order_by(Response.id)
         )
-        df = execute_to_df(session, statement)
+        df = execute_to_df(session, statement, convert_category)
         if split_xy:
             return df.drop("price", axis=1), df[["price"]]
         else:
