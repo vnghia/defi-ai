@@ -13,6 +13,6 @@ def execute_to_df(session: SQLSession, statement: Select):
     rows = session.execute(statement).all()
     df = pd.DataFrame(
         [row._mapping for row in rows],
-        columns=[c.name for c in statement.selected_columns],
+        columns=[str(c.name) for c in statement.selected_columns],
     )
     return df
