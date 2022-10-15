@@ -13,11 +13,11 @@ from sqlalchemy.sql.selectable import Select
 
 def execute_to_df(session: SQLSession, statement: Select, columns: list[str] = None):
     rows = session.execute(statement).all()
-    if not is_kaggle:
-        columns = [c.name for c in statement.selected_columns]
     df = pd.DataFrame(
         [row._mapping for row in rows],
-        columns=columns,
+        columns=[c.name for c in statement.selected_columns]
+        if not is_kaggle
+        else columns,
     )
     return df
 
