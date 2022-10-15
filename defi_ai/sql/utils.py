@@ -4,8 +4,6 @@
 
 from __future__ import annotations
 
-import os
-
 import pandas as pd
 from defi_ai.type import SQLSession
 from sqlalchemy.sql.selectable import Select
@@ -18,7 +16,3 @@ def execute_to_df(session: SQLSession, statement: Select):
         columns=[c.name for c in statement.selected_columns],
     )
     return df
-
-
-# TODO(vnghia): fix sqlalchemy while running on Kaggle
-is_kaggle = "KAGGLE_URL_BASE" in os.environ

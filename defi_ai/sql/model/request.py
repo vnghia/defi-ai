@@ -12,7 +12,7 @@ from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.hotel import Hotel
 from defi_ai.sql.model.response import Response
-from defi_ai.sql.utils import execute_to_df, is_kaggle
+from defi_ai.sql.utils import execute_to_df
 from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, func, select
 from sqlalchemy.orm import relationship
@@ -135,22 +135,11 @@ class Request(SQLBase):
     def load_dataset(
         cls, session: SQLSession, split_xy: bool = True
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
-        if not is_kaggle:
-            statement = (
-                cls.get_dataset_statement(Request, Response)
-                .add_columns(Response.price)
-                .order_by(Response.id)
-            )
-        else:
-            statement = """SELECT request.language, request.city, request.date, request.mobile, hotel."group", hotel.brand, hotel.parking, hotel.pool, hotel.children_policy, response.stock, anon_1.request_count, anon_1.request_language_count, anon_1.request_city_count, anon_1.request_date_count, anon_1.request_mobile_count, anon_2.hotel_city_count, anon_2.hotel_brand_count, anon_2.hotel_group_count, anon_2.hotel_city_group_count, anon_2.hotel_city_brand_count, response.price 
-FROM response JOIN hotel ON response.hotel_id = hotel.id JOIN (SELECT hotel.id AS id, anon_3.count_1 AS hotel_city_count, anon_4.count_2 AS hotel_brand_count, anon_5.count_3 AS hotel_group_count, anon_6.count_4 AS hotel_city_group_count, anon_7.count_5 AS hotel_city_brand_count 
-FROM hotel JOIN (SELECT hotel.city AS city, count(*) AS count_1 
-FROM hotel GROUP BY hotel.city) AS anon_3 ON hotel.city = anon_3.city JOIN (SELECT hotel.brand AS brand, count(*) AS count_2 
-FROM hotel GROUP BY hotel.brand) AS anon_4 ON hotel.brand = anon_4.brand JOIN (SELECT hotel."group" AS "group", count(*) AS count_3 
-FROM hotel GROUP BY hotel."group") AS anon_5 ON hotel."group" = anon_5."group" JOIN (SELECT hotel.city AS city, hotel."group" AS "group", count(*) AS count_4 
-FROM hotel GROUP BY hotel.city, hotel."group") AS anon_6 ON hotel.city = anon_6.city AND hotel."group" = anon_6."group" JOIN (SELECT hotel.city AS city, hotel.brand AS brand, count(*) AS count_5 
-FROM hotel GROUP BY hotel.city, hotel.brand) AS anon_7 ON hotel.city = anon_7.city AND hotel.brand = anon_7.brand) AS anon_2 ON response.hotel_id = anon_2.id JOIN request ON response.request_id = request.id JOIN (SELECT request.id AS id, rank() OVER (PARTITION BY request.avatar_id ORDER BY request.id) AS request_count, rank() OVER (PARTITION BY request.avatar_id, request.language ORDER BY request.id) AS request_language_count, rank() OVER (PARTITION BY request.avatar_id, request.city ORDER BY request.id) AS request_city_count, rank() OVER (PARTITION BY request.avatar_id, request.date ORDER BY request.id) AS request_date_count, rank() OVER (PARTITION BY request.avatar_id, request.mobile ORDER BY request.id) AS request_mobile_count 
-FROM request) AS anon_1 ON request.id = anon_1.id ORDER BY response.id"""
+        statement = (
+            cls.get_dataset_statement(Request, Response)
+            .add_columns(Response.price)
+            .order_by(Response.id)
+        )
         df = execute_to_df(session, statement)
         if split_xy:
             return df.drop("price", axis=1), df[["price"]]
