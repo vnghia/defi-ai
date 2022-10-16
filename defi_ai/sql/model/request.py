@@ -17,6 +17,7 @@ from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, func, select
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.util import AliasedClass
+from sqlalchemy.sql.selectable import Select
 
 
 class Request(SQLBase):
@@ -138,12 +139,15 @@ class Request(SQLBase):
         split_xy: bool = True,
         convert_category: bool = True,
         convert_enum: bool = False,
-    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+        get_statement: bool = False,
+    ) -> Union[pd.DataFrame, tuple[pd.DataFrame, pd.DataFrame], Select]:
         statement = (
             cls.get_dataset_statement(Request, Response)
             .add_columns(Response.price)
             .order_by(Response.id)
         )
+        if get_statement:
+            return statement
         df = execute_to_df(session, statement, convert_category, convert_enum)
         if split_xy:
             return df.drop("price", axis=1), df[["price"]]

@@ -2,22 +2,17 @@
 #
 # SPDX-License-Identifier: MIT
 
+from typing import Union
+
 import pandas as pd
 from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar
 from defi_ai.sql.model.request import Request
 from defi_ai.sql.utils import execute_to_df
 from defi_ai.type import City, Language, SQLSession
-from sqlalchemy import (
-    Boolean,
-    Column,
-    Enum,
-    ForeignKey,
-    Integer,
-    select,
-    update,
-)
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, select, update
 from sqlalchemy.orm import aliased, relationship, synonym
+from sqlalchemy.sql.selectable import Select
 
 
 class Sample(SQLBase):
@@ -95,7 +90,8 @@ class Sample(SQLBase):
         session: SQLSession,
         convert_category: bool = True,
         convert_enum: bool = False,
-    ) -> pd.DataFrame:
+        get_statement: bool = False,
+    ) -> Union[pd.DataFrame, Select]:
         request_table = aliased(
             Request,
             select(
@@ -113,4 +109,6 @@ class Sample(SQLBase):
         statement = Request.get_dataset_statement(request_table, Sample).order_by(
             Sample.id
         )
+        if get_statement:
+            return statement
         return execute_to_df(session, statement, convert_category, convert_enum)
