@@ -93,7 +93,10 @@ class Sample(SQLBase):
 
     @classmethod
     def load_dataset(
-        cls, session: SQLSession, convert_category: bool = True
+        cls,
+        session: SQLSession,
+        convert_category: bool = True,
+        convert_enum: bool = False,
     ) -> pd.DataFrame:
         request_table = aliased(
             Request,
@@ -112,4 +115,4 @@ class Sample(SQLBase):
         statement = Request.get_dataset_statement(request_table, Sample).order_by(
             Sample.id
         )
-        return execute_to_df(session, statement, convert_category)
+        return execute_to_df(session, statement, convert_category, convert_enum)

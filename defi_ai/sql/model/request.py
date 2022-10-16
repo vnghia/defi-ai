@@ -133,14 +133,18 @@ class Request(SQLBase):
 
     @classmethod
     def load_dataset(
-        cls, session: SQLSession, split_xy: bool = True, convert_category: bool = True
+        cls,
+        session: SQLSession,
+        split_xy: bool = True,
+        convert_category: bool = True,
+        convert_enum: bool = False,
     ) -> tuple[pd.DataFrame, pd.DataFrame]:
         statement = (
             cls.get_dataset_statement(Request, Response)
             .add_columns(Response.price)
             .order_by(Response.id)
         )
-        df = execute_to_df(session, statement, convert_category)
+        df = execute_to_df(session, statement, convert_category, convert_enum)
         if split_xy:
             return df.drop("price", axis=1), df[["price"]]
         else:
