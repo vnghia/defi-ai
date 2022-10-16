@@ -10,7 +10,6 @@ from defi_ai.sql.utils import execute_to_df
 from defi_ai.type import City, Language, SQLSession
 from sqlalchemy import (
     Boolean,
-    CheckConstraint,
     Column,
     Enum,
     ForeignKey,
@@ -23,7 +22,6 @@ from sqlalchemy.orm import aliased, relationship, synonym
 
 class Sample(SQLBase):
     __tablename__ = "sample"
-    __table_args__ = (CheckConstraint("0 <= children_policy AND children_policy <= 2"),)
 
     id = Column("id", Integer, primary_key=True, autoincrement=False)
     order_requests = Column("order_requests", Integer)
