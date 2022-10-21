@@ -13,7 +13,6 @@ from defi_ai.sql.base import SQLBase
 from defi_ai.sql.model.avatar import Avatar  # noqa: F401
 from defi_ai.sql.model.hotel import Hotel  # noqa: F401
 from defi_ai.sql.model.request import Request  # noqa: F401
-from defi_ai.sql.model.request_count import RequestCount  # noqa: F401
 from defi_ai.sql.model.response import Response  # noqa: F401
 from defi_ai.sql.model.sample import Sample  # noqa: F401
 from defi_ai.type import SQLEngine

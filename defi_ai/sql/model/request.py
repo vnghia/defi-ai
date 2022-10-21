@@ -14,7 +14,16 @@ from defi_ai.sql.model.hotel import Hotel
 from defi_ai.sql.model.response import Response
 from defi_ai.sql.utils import execute_to_df
 from defi_ai.type import City, Language, SQLSession
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, func, select
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    func,
+    select,
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.util import AliasedClass
 from sqlalchemy.sql.selectable import Select
@@ -36,6 +45,7 @@ class Request(SQLBase):
         cascade="all, delete",
         passive_deletes=True,
     )
+    created_at = Column("created_at", DateTime, server_default=func.now())
     avatar = relationship("Avatar", back_populates="requests")
 
     def __repr__(self) -> str:
@@ -55,7 +65,7 @@ class Request(SQLBase):
         mobile: bool,
     ) -> Column[Integer]:
         avatar_name = session.get(Avatar, avatar_id).name
-        prices = scrape.get_pricing(session, avatar_name, language, city, date, mobile)
+        prices = scrape.get_pricing(avatar_name, language, city, date, mobile)
         req = cls(
             avatar_id=avatar_id,
             language=language,

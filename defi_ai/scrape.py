@@ -5,26 +5,14 @@
 from __future__ import annotations
 
 import os
-from datetime import date
 from posixpath import join as urljoin
 
 import requests
 
-from defi_ai.sql.model.request_count import RequestCount
-from defi_ai.type import City, Language, SQLSession
+from defi_ai.type import City, Language
 
 HOST_URL = os.environ["HOST_URL"]
 USER_ID = os.environ["USER_ID"]
-
-
-def update_request_count(session: SQLSession):
-    today = date.today()
-    rc: RequestCount = session.get(RequestCount, today)
-    if rc is None:
-        session.add(RequestCount(date=today, count=1))
-    else:
-        rc.count += 1
-    session.commit()
 
 
 def get_url(*paths: str) -> str:
@@ -46,14 +34,12 @@ def list_users() -> list[tuple[int, str]]:
 
 
 def get_pricing(
-    session: SQLSession,
     name: str,
     language: Language,
     city: City,
     date: int,
     mobile: bool,
 ) -> list[dict[str, int]]:
-    update_request_count(session)
     params = {
         "avatar_name": name,
         "language": language.name,
