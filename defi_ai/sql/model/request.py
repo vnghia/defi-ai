@@ -58,14 +58,14 @@ class Request(SQLBase):
     def send(
         cls,
         session: SQLSession,
-        avatar_id: int,
+        avatar_name: str,
         language: Language,
         city: City,
         date: int,
         mobile: bool,
     ) -> Column[Integer]:
-        avatar_name = session.get(Avatar, avatar_id).name
-        prices = scrape.get_pricing(avatar_name, language, city, date, mobile)
+        avatar_id, server_name = Avatar.from_name(avatar_name)
+        prices = scrape.get_pricing(server_name, language, city, date, mobile)
         req = cls(
             avatar_id=avatar_id,
             language=language,
