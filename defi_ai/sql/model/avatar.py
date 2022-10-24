@@ -18,6 +18,7 @@ class Avatar(SQLBase):
     __tablename__ = "avatar"
     id = Column("id", Integer, primary_key=True)
     name = Column("name", String(64), unique=True, index=True)
+    server_id = Column("server_id", Integer)
     server_name = Column("server_name", String(64))
     requests = relationship(
         "Request", back_populates="avatar", cascade="all, delete", passive_deletes=True
@@ -35,8 +36,8 @@ class Avatar(SQLBase):
     ) -> Column[String]:
         server_name = server_name or uuid.uuid4().hex
         name = name or f"random_{uuid.uuid4().hex[:6]}"
-        _, name = scrape.create_user(server_name)
-        avatar = cls(name=name, server_name=server_name)
+        server_id, server_name = scrape.create_user(server_name)
+        avatar = cls(name=name, server_id=server_id, server_name=server_name)
         session.add(avatar)
         session.commit()
         return avatar.name
