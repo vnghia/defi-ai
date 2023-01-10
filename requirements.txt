@@ -6,5 +6,5 @@ plotly==5.11.0
 dython==0.7.3
 scikit-learn==0.24.2
 xgboost==1.6.2
-tensorflow==2.10.0
-keras==2.10.0
+tensorflow==2.11.0
+keras==2.11.0
