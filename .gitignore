@@ -256,3 +256,5 @@ $RECYCLE.BIN/
 Notebook/data/
 Notebook/model/
 Notebook/submission/
+Notebook/sub/
+Notebook/catboost_info/
