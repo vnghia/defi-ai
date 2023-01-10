@@ -119,6 +119,7 @@ class Request(SQLBase):
                 request.city,
                 request.date,
                 request.mobile,
+                response.hotel_id,
                 Hotel.group,
                 Hotel.brand,
                 Hotel.parking,
