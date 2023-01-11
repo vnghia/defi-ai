@@ -32,7 +32,7 @@ docker build .
 Or pull directly from Docker Hub
 
 ```
-docker pull
+docker pull fishies43/defi
 ```
 
 # Trainning
