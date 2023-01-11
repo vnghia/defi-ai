@@ -9,3 +9,4 @@ xgboost==1.6.2
 tensorflow==2.11.0
 keras==2.11.0
 gradio==3.16.1
+gdown==4.6.0
