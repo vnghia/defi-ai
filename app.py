@@ -21,7 +21,7 @@ from sqlalchemy import select
 
 from defi_ai import Hotel, init_session
 from defi_ai.sql.utils import execute_to_df
-from defi_ai.type import City, HotelBrand, Language
+from defi_ai.type import City, HotelBrand, HotelGroup, Language
 
 Session = init_session()
 session = Session()
@@ -68,32 +68,25 @@ def add_user(users: dict, name: str):
     )
 
 
+def update_past_requests(userdata):
+    return gr.Dropdown.update(
+        choices=[
+            f"Request #{i + 1}, language: \"{v['language'].name.capitalize()}\", city: \"{v['city'].name.capitalize()}\", date: {v['date']}, mobile: {v['mobile']}"
+            for i, v in enumerate(userdata)
+        ],
+        interactive=True,
+    )
+
+
 def login_user(users: dict, username: str):
     return (
         username,
         gr.Dropdown.update(interactive=True),
         gr.Dropdown.update(interactive=True),
-        None,
-        users[username],
-    )
-
-
-def get_hotel_list(hotel_df: pd.DataFrame, city: str, hotel_brand: str):
-    hotels = hotel_df[
-        (hotel_df.city == City[city.lower()])
-        & (hotel_df.brand == HotelBrand[hotel_brand])
-    ][["parking", "pool", "children_policy"]]
-    return (
-        gr.Dropdown.update(
-            choices=[
-                f"id {index} hotel {hotel_brand} city {city} parking {value[0]} pool {value[1]} children policy {value[2]}"
-                for index, value in hotels.iterrows()
-            ],
-            interactive=True,
-        ),
-        gr.Dropdown.update(interactive=True),
         gr.Checkbox.update(interactive=True),
         gr.Slider.update(interactive=True),
+        None,
+        update_past_requests(users[username]),
     )
 
 
@@ -103,31 +96,18 @@ def get_price(
     hotel_df: pd.DataFrame,
     users: dict,
     username: str,
-    language: str,
-    city: str,
+    language_str: str,
+    city_str: str,
     date: float,
     mobile: bool,
-    hotel: str,
-    stock: int,
 ):
     userdata = users[username]
-    language = Language[language.lower()]
-    city = City[city.lower()]
+    language = Language[language_str.lower()]
+    city = City[city_str.lower()]
     date = int(date)
-    hotel_id = int("".join(itertools.takewhile(str.isdigit, hotel[len("id ") :])))
-    (
-        group,
-        brand,
-        parking,
-        pool,
-        children_policy,
-        hotel_city_count,
-        hotel_brand_count,
-        hotel_group_count,
-        hotel_city_group_count,
-        hotel_city_brand_count,
-    ) = hotel_df[hotel_df.id == hotel_id][
+    request_stock_data = hotel_df[hotel_df.city == city][
         [
+            "id",
             "group",
             "brand",
             "parking",
@@ -139,9 +119,9 @@ def get_price(
             "hotel_city_group_count",
             "hotel_city_brand_count",
         ]
-    ].values[
-        0
     ]
+    request_stock_data = request_stock_data.rename(columns={"id": "hotel_id"})
+
     request_count = len(userdata) + 1
     request_language_count = 1
     request_city_count = 1
@@ -156,70 +136,106 @@ def get_price(
             request_date_count += 1
         if data["mobile"] == mobile:
             request_mobile_count += 1
-    stock = int(
-        stock
-        if stock >= 0
-        else stock_model.predict(
-            [
-                language,
-                city,
-                date,
-                mobile,
-                hotel_id,
-                group,
-                brand,
-                parking,
-                pool,
-                children_policy,
-                request_count,
-                request_language_count,
-                request_city_count,
-                request_date_count,
-                request_mobile_count,
-                hotel_city_count,
-                hotel_brand_count,
-                hotel_group_count,
-                hotel_city_group_count,
-                hotel_city_brand_count,
-            ]
-        )
-    )
-    price = price_model.predict(
+
+    request_stock_data["language"] = language
+    request_stock_data["city"] = city
+    request_stock_data["date"] = date
+    request_stock_data["mobile"] = mobile
+    request_stock_data["request_count"] = request_count
+    request_stock_data["request_language_count"] = request_language_count
+    request_stock_data["request_city_count"] = request_city_count
+    request_stock_data["request_date_count"] = request_date_count
+    request_stock_data["request_mobile_count"] = request_mobile_count
+
+    request_stock_data = request_stock_data[
         [
-            language,
-            city,
-            date,
-            mobile,
-            hotel_id,
-            group,
-            brand,
-            parking,
-            pool,
-            children_policy,
-            stock,
-            request_count,
-            request_language_count,
-            request_city_count,
-            request_date_count,
-            request_mobile_count,
-            hotel_city_count,
-            hotel_brand_count,
-            hotel_group_count,
-            hotel_city_group_count,
-            hotel_city_brand_count,
+            "language",
+            "city",
+            "date",
+            "mobile",
+            "hotel_id",
+            "group",
+            "brand",
+            "parking",
+            "pool",
+            "children_policy",
+            "request_count",
+            "request_language_count",
+            "request_city_count",
+            "request_date_count",
+            "request_mobile_count",
+            "hotel_city_count",
+            "hotel_brand_count",
+            "hotel_group_count",
+            "hotel_city_group_count",
+            "hotel_city_brand_count",
         ]
-    )
+    ]
+
+    stock = stock_model.predict(request_stock_data).astype(int)
+
+    request_price_data = request_stock_data.assign(stock=stock)[
+        [
+            "language",
+            "city",
+            "date",
+            "mobile",
+            "hotel_id",
+            "group",
+            "brand",
+            "parking",
+            "pool",
+            "children_policy",
+            "stock",
+            "request_count",
+            "request_language_count",
+            "request_city_count",
+            "request_date_count",
+            "request_mobile_count",
+            "hotel_city_count",
+            "hotel_brand_count",
+            "hotel_group_count",
+            "hotel_city_group_count",
+            "hotel_city_brand_count",
+        ]
+    ]
+    price = price_model.predict(request_price_data)
+    price_df = request_price_data.assign(price=price)[
+        [
+            "hotel_id",
+            "group",
+            "brand",
+            "parking",
+            "pool",
+            "children_policy",
+            "stock",
+            "price",
+        ]
+    ]
+    price_df["group"] = price_df["group"].apply(lambda x: HotelGroup(x).name)
+    price_df["brand"] = price_df["brand"].apply(lambda x: HotelBrand(x).name)
     userdata.append(
         {
             "language": language,
             "city": city,
             "date": date,
             "mobile": mobile,
-            "hotel_id": hotel_id,
-            "price": price,
+            "response": price_df,
         }
     )
-    return price, userdata
+    return price_df, update_past_requests(userdata)
+
+
+def get_past_request(users: dict, username: str, past_request_index: str):
+    index = (
+        int(
+            "".join(
+                itertools.takewhile(str.isdigit, past_request_index[len("Request #") :])
+            )
+        )
+        - 1
+    )
+    return users[username][index]["response"]
 
 
 demo = gr.Blocks()
@@ -242,27 +258,17 @@ with demo:
         login_btn = gr.Button("Login")
 
         with gr.Row():
-            cities = gr.Dropdown(
-                [e.name.capitalize() for e in City],
-                label="City",
-                interactive=False,
-            )
-            hotel_brands = gr.Dropdown(
-                [e.name for e in HotelBrand],
-                label="Hotel brand",
-                interactive=False,
-            )
-        hotel_btn = gr.Button("Search hotels")
-        hotels = gr.Dropdown([], label="Hotels")
-
-        with gr.Row():
             with gr.Column():
                 languages = gr.Dropdown(
                     [e.name.capitalize() for e in Language],
                     label="Language",
                     interactive=False,
                 )
-                stock = gr.Number(label="Stock")
+                cities = gr.Dropdown(
+                    [e.name.capitalize() for e in City],
+                    label="City",
+                    interactive=False,
+                )
             with gr.Column():
                 is_mobile = gr.Checkbox(
                     label="Is mobile",
@@ -275,16 +281,17 @@ with demo:
                     label="Date before",
                     interactive=False,
                 )
-        price_btn = gr.Button("Get Price")
+        price_btn = gr.Button("Get price")
 
-        hotel_btn.click(
-            functools.partial(get_hotel_list, hotel_df),
-            [cities, hotel_brands],
-            [hotels, languages, is_mobile, date_before],
+        price = gr.DataFrame(interactive=False, label="Price")
+
+        past_requests = gr.Dropdown([], interactive=False, label="Past requests")
+        get_past_request_btn = gr.Button("Get past request", interactive=False)
+        past_request = gr.DataFrame(interactive=False, label="Past request")
+        get_past_request_btn.click(
+            get_past_request, [users, usernames, past_requests], [past_request]
         )
 
-        price = gr.Text(label="Price")
-        histories = gr.JSON(label="History")
         price_btn.click(
             functools.partial(get_price, price_model, stock_model, hotel_df),
             [
@@ -294,16 +301,22 @@ with demo:
                 cities,
                 date_before,
                 is_mobile,
-                hotels,
-                stock,
             ],
-            [price, histories],
+            [price, past_requests],
         )
 
         login_btn.click(
             login_user,
             [users, usernames],
-            [current_user, cities, hotel_brands, price, histories],
+            [
+                current_user,
+                cities,
+                languages,
+                is_mobile,
+                date_before,
+                price,
+                past_requests,
+            ],
         )
 
 
