@@ -7,3 +7,5 @@ COPY . .
 RUN pip install .
 
 RUN pip install -r requirements.txt
+
+RUN python model/download.py
