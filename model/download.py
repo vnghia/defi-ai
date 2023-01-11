@@ -18,3 +18,21 @@ if not stock_model_path.exists():
         output=str(stock_model_path),
         quiet=False,
     )
+
+xgboost_model_path = Path("model/xgb.ubj")
+
+if not xgboost_model_path.exists():
+    gdown.download(
+        "https://drive.google.com/uc?export=download&confirm=pbef&id=1r7HNiONPy_i0aVSb0L5u1z3qcs3d2SRO",
+        output=str(xgboost_model_path),
+        quiet=False,
+    )
+
+rf_model_path = Path("model/rf.sav")
+
+if not rf_model_path.exists():
+    gdown.download(
+        "https://drive.google.com/uc?export=download&confirm=pbef&id=1FgS40cYfYGZ7ll9TCTSdOdCqi58BxyFc",
+        output=str(rf_model_path),
+        quiet=False,
+    )
