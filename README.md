@@ -49,6 +49,12 @@ To download pretrained model (no need if running inside Docker)
 python model/download.py
 ```
 
+If running inside Docker, you must start Docker with:
+
+```
+docker run -it -p 7860:7860 -e GRADIO_SERVER_NAME=0.0.0.0 --rm fishies43/defi
+```
+
 Start Gradio
 
 ```
