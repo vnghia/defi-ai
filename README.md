@@ -2,6 +2,10 @@
 
 This package provides a Python interface to scrape, save and load data from a Google Cloud SQL server.
 
+In addition, we have `train.py` for training a model based on the data we collected and `app.py` for a Gradio demo.
+
+Unfortunately, some networks refuse to connect to a Google Cloud SQL Endpoint so if you are having a problem with connection timeout, please use a VPN or a different network.
+
 ---
 
 # Installation
