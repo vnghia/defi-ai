@@ -57,13 +57,14 @@ python app.py
 
 ## How to use
 
+This app aims to give user a close experience to a normal "searching hotel price" experience.
+
 - Enter an username in `Signup username` or leave it as a random string and press `Signup`.
 - New user will automatically appear in `Login username`. Choose one username and press `Login`.
 - The `Current user` shows which user is currently logged in.
-- Choose `City` and `Hotel brand` and press `Search hotels`.
-- Choose one hotel in `Hotel`.
-- Choose `Languages`, `Is mobile`, `Date before` and `Stock` (if `Stock < 0` the model will automatically regress the value of `Stock` based on other information).
-- Press `Get Price`, the price will be shown in `Price`.
-- `History` shows the request and prices histories of current user and will automaticall reload if:
+- Choose `Languages`, `Is mobile`, `Date before` and `City`.
+- Press `Get price`, the price will be shown in `Price`.
+- `Past requests` show the previous requests made by the current user and will automatically reload if:
   - The current user makes a new price request (press the `Get Price` button).
   - A new user logged in.
+- Choose one of `Past requests` and press `Get past request` to view the response corresponding to that request.
