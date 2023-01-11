@@ -1,21 +1,56 @@
-# Defi AI
+# Defi AI 2022
 
-[![PyPI - Version](https://img.shields.io/pypi/v/defi-ai.svg)](https://pypi.org/project/defi-ai)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/defi-ai.svg)](https://pypi.org/project/defi-ai)
+This package provides a Python interface to scrape, save and load data from a Google Cloud SQL server.
 
------
+---
 
-**Table of Contents**
+# Installation
 
-- [Installation](#installation)
-- [License](#license)
+## Local machine
 
-## Installation
+To install this package for loading/saving data
 
-```console
-pip install defi-ai
+```bash
+git clone https://github.com/vnghia/defi-ai
+cd defi-ai && pip install .
 ```
 
-## License
+To install the dependencies to train or inference.
 
-`defi-ai` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+```bash
+pip install -r requirements.txt
+```
+
+## Docker
+
+Build the image
+
+```
+docker build .
+```
+
+Or pull directly from Docker Hub
+
+```
+docker pull fishies43/defi
+```
+
+# Trainning
+
+```
+python train.py
+```
+
+# Gradio
+
+To download pretrained model (no need if running inside Docker)
+
+```
+python model/download.py
+```
+
+Start Gradio
+
+```
+python app.py
+```
